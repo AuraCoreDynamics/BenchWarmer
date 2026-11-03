@@ -1,0 +1,17 @@
+{
+  "project": "BenchWarmer",
+  "methodology_version": "2.2",
+  "overall_complexity": "high",
+  "convergence_criteria": {
+    "critical_issues": 0,
+    "high_issues": 0,
+    "min_test_pass_rate": 1.0,
+    "min_behavioral_assertions_per_tg": 3
+  },
+  "tags": [
+    "cross-sovereignty",
+    "numerical-precision-invariance",
+    "ui-wire-sync",
+    "zero-runtime-dependencies"
+  ]
+}

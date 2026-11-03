@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BenchWarmer MCP Tool Schemas",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "search_models",
+      "description": "Search for models in the benchmark store by query string with optional parameter range filtering.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "FTS search query or model ID fragment"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "default": 10
+          },
+          "min_params": {
+            "type": "number",
+            "description": "Minimum parameter count in billions"
+          },
+          "max_params": {
+            "type": "number",
+            "description": "Maximum parameter count in billions"
+          }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "get_model_benchmarks",
+      "description": "Retrieve full benchmark scores and estimated VRAM footprint across quantizations for a specific model.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Exact or resolved model ID"
+          }
+        },
+        "required": ["model_id"]
+      }
+    },
+    {
+      "name": "compare_models",
+      "description": "Perform a side-by-side comparative analysis of two models across all shared benchmarks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model_a": {
+            "type": "string",
+            "description": "First model ID"
+          },
+          "model_b": {
+            "type": "string",
+            "description": "Second model ID"
+          }
+        },
+        "required": ["model_a", "model_b"]
+      }
+    },
+    {
+      "name": "rank_models",
+      "description": "Rank models by a specified benchmark metric with hardware constraint filtering (VRAM, quantization, parameters).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "benchmark": {
+            "type": "string",
+            "description": "Benchmark metric to rank by (e.g. hf_v2_avg, ifeval, math_hard)",
+            "default": "hf_v2_avg"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Maximum number of results to return",
+            "default": 10
+          },
+          "min_params": {
+            "type": "number",
+            "description": "Minimum parameter count in billions"
+          },
+          "max_params": {
+            "type": "number",
+            "description": "Maximum parameter count in billions"
+          },
+          "max_vram_gb": {
+            "type": "number",
+            "description": "Maximum VRAM budget in GB"
+          },
+          "quant": {
+            "type": "string",
+            "description": "Quantization format for VRAM calculation",
+            "default": "bf16"
+          }
+        }
+      }
+    },
+    {
+      "name": "score_candidates",
+      "description": "Score a list of candidate model IDs using weighted benchmark criteria.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of candidate model IDs or query names"
+          },
+          "weights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Dictionary of benchmark names to non-negative weights"
+          },
+          "strict_benchmarks": {
+            "type": "boolean",
+            "description": "If True, candidates missing any benchmark in weights receive missing penalty without weight re-normalization",
+            "default": false
+          }
+        },
+        "required": ["candidates", "weights"]
+      }
+    },
+    {
+      "name": "get_pareto_frontier",
+      "description": "Compute the Pareto-optimal frontier of models balancing capability score against VRAM footprint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string",
+            "description": "Benchmark metric to optimize",
+            "default": "hf_v2_avg"
+          },
+          "max_vram_gb": {
+            "type": "number",
+            "description": "Optional upper bound on VRAM in GB"
+          },
+          "quant": {
+            "type": "string",
+            "description": "Quantization format for VRAM calculation",
+            "default": "bf16"
+          }
+        }
+      }
+    },
+    {
+      "name": "audit_model_contamination",
+      "description": "Audit a model for benchmark contamination, Goodhart overfit smells, and reasoning cliffs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "model_id": {
+            "type": "string",
+            "description": "Model ID to audit"
+          }
+        },
+        "required": ["model_id"]
+      }
+    }
+  ],
+  "definitions": {
+    "ModelSummary": {
+      "type": "object",
+      "properties": {
+        "model_id": { "type": "string" },
+        "org": { "type": "string" },
+        "params_b": { "type": ["number", "null"] },
+        "architecture": { "type": ["string", "null"] },
+        "hf_v2_avg": { "type": ["number", "null"] },
+        "arena_elo_raw": { "type": ["number", "null"] }
+      },
+      "required": ["model_id", "org"]
+    },
+    "ModelRecord": {
+      "type": "object",
+      "properties": {
+        "model_id": { "type": "string" },
+        "org": { "type": "string" },
+        "model_name": { "type": "string" },
+        "base_model": { "type": ["string", "null"] },
+        "params_b": { "type": ["number", "null"] },
+        "active_params_b": { "type": ["number", "null"] },
+        "context_length": { "type": ["integer", "null"] },
+        "architecture": { "type": ["string", "null"] },
+        "license": { "type": ["string", "null"] },
+        "precision": { "type": ["string", "null"] },
+        "is_moe": { "type": "boolean" },
+        "scores": { "type": "object", "additionalProperties": { "type": "number" } },
+        "raw_scores": { "type": "object", "additionalProperties": { "type": "number" } },
+        "estimated_vram_gb": { "type": "object", "additionalProperties": { "type": "number" } }
+      },
+      "required": ["model_id", "org", "model_name", "is_moe", "scores", "raw_scores", "estimated_vram_gb"]
+    },
+    "MetricDelta": {
+      "type": "object",
+      "properties": {
+        "benchmark": { "type": "string" },
+        "score_a": { "type": ["number", "null"] },
+        "score_b": { "type": ["number", "null"] },
+        "abs_delta": { "type": ["number", "null"] },
+        "pct_delta": { "type": ["number", "null"] },
+        "winner": { "type": "string" }
+      },
+      "required": ["benchmark", "winner"]
+    },
+    "ModelComparisonResult": {
+      "type": "object",
+      "properties": {
+        "model_a": { "$ref": "#/definitions/ModelRecord" },
+        "model_b": { "$ref": "#/definitions/ModelRecord" },
+        "deltas": { "type": "object", "additionalProperties": { "$ref": "#/definitions/MetricDelta" } },
+        "wins_a": { "type": "integer" },
+        "wins_b": { "type": "integer" },
+        "ties": { "type": "integer" },
+        "composite_delta": { "type": "number" }
+      },
+      "required": ["model_a", "model_b", "deltas", "wins_a", "wins_b", "ties", "composite_delta"]
+    },
+    "CandidateScore": {
+      "type": "object",
+      "properties": {
+        "requested_id": { "type": "string" },
+        "matched_model_id": { "type": ["string", "null"] },
+        "composite_score": { "type": "number" },
+        "matched_metrics": { "type": "object", "additionalProperties": { "type": "number" } },
+        "missing_benchmarks": { "type": "array", "items": { "type": "string" } },
+        "params_b": { "type": ["number", "null"] }
+      },
+      "required": ["requested_id", "composite_score", "matched_metrics", "missing_benchmarks"]
+    },
+    "ParetoPoint": {
+      "type": "object",
+      "properties": {
+        "model_id": { "type": "string" },
+        "params_b": { "type": "number" },
+        "estimated_vram_gb": { "type": "number" },
+        "quant": { "type": "string" },
+        "metric": { "type": "string" },
+        "score": { "type": "number" },
+        "efficiency_ratio": { "type": "number" }
+      },
+      "required": ["model_id", "params_b", "estimated_vram_gb", "quant", "metric", "score", "efficiency_ratio"]
+    },
+    "ContaminationReport": {
+      "type": "object",
+      "properties": {
+        "model_id": { "type": "string" },
+        "params_b": { "type": ["number", "null"] },
+        "anomaly_score": { "type": "number" },
+        "status": { "type": "string" },
+        "flags": { "type": "array", "items": { "type": "string" } },
+        "z_score_spread": { "type": "number" },
+        "ifeval_vs_knowledge_gap": { "type": ["number", "null"] }
+      },
+      "required": ["model_id", "anomaly_score", "status", "flags", "z_score_spread"]
+    }
+  }
+}

@@ -1,0 +1,51 @@
+name: Nightly Upstream Sync & Release Gate
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-and-release:
+    name: Check Upstream Datasets & Auto-Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Build & Ingest Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .[build] build
+
+      - name: Execute Upstream Sync & Checksum Gate
+        id: sync
+        run: |
+          python scripts/build_db.py --check-changed
+
+      - name: Handle Data Updates
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          echo "Upstream benchmark changes detected. Checksum: ${{ steps.sync.outputs.checksum }}"
+          python scripts/black_preflight_audit.py
+          python -m unittest discover -s tests -p "test_*.py" -v
+          python scripts/black_redteam_harness.py scoring.json
+          python scripts/make_zipapp.py
+          python -m build
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/benchwarmer/data/benchmarks.db src/benchwarmer/data/checksum.sha256
+          git commit -m "chore(data): auto-update benchmarks.db [skip ci] (${{ steps.sync.outputs.checksum }})"
+          git push origin main

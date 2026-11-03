@@ -33,6 +33,7 @@ class BenchWarmerGUIController:
     def get_leaderboard_data(
         self,
         query: str = "",
+        limit: Optional[int] = None,
         min_params: Optional[float] = None,
         max_params: Optional[float] = None,
         vram_budget: Optional[float] = None,
@@ -41,10 +42,11 @@ class BenchWarmerGUIController:
         ascending: bool = False,
     ) -> List[Dict[str, Any]]:
         """Retrieve leaderboard rows with dual raw/display values for accurate sorting."""
+        fetch_limit = limit if limit is not None else 1000
         if vram_budget is not None:
             summaries = self.bw.rank(
                 benchmark=sort_key,
-                limit=1000,
+                limit=fetch_limit,
                 min_params=min_params,
                 max_params=max_params,
                 max_vram_gb=vram_budget,
@@ -53,7 +55,7 @@ class BenchWarmerGUIController:
         else:
             summaries = self.bw.search(
                 query=query if query else "*",
-                limit=1000,
+                limit=fetch_limit,
                 min_params=min_params,
                 max_params=max_params,
             )

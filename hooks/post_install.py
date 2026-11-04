@@ -2,14 +2,16 @@
 
 Ensures Tcl/Tk runtime assets are fully linked/copied into the sovereign
 environment's lib directory so the desktop Tkinter GUI runs out of the box
-on all host platforms without requiring external environment variables.
+on all host platforms without requiring external environment variables,
+and installs web server dependencies (FastAPI and Uvicorn).
 """
 
 import argparse
 import os
-import shutil
-import sys
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
 
 def main():
@@ -27,7 +29,6 @@ def main():
     if sys.platform == "win32":
         tcl_dest = install_dir / "lib" / "tcl9.0"
         if not tcl_dest.exists():
-            # Search for source tcl library in base interpreter or bootstrapped python
             candidates = [
                 install_dir / "base" / "Library" / "lib",
                 Path(sys.base_prefix) / "Library" / "lib",
@@ -47,6 +48,12 @@ def main():
                             else:
                                 shutil.copy2(item, dest_item)
                     break
+
+    # Ensure web server dependencies are present in sovereign environment
+    python_exe = install_dir / "Scripts" / "python.exe" if sys.platform == "win32" else install_dir / "bin" / "python"
+    if python_exe.exists():
+        print(f"[benchwarmer hook] Ensuring fastapi and uvicorn are available...")
+        subprocess.run([str(python_exe), "-m", "pip", "install", "fastapi", "uvicorn"], check=False)
 
     print("[benchwarmer hook] Post-install configuration complete.")
     return 0

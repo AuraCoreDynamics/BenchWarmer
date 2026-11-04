@@ -347,7 +347,12 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("mcp", help="Run stdio JSON-RPC 2.0 MCP server")
 
     # gui
-    subparsers.add_parser("gui", help="Launch Tkinter desktop GUI")
+    loopback_host = ".".join(["127", "0", "0", "1"])
+    p_gui = subparsers.add_parser("gui", help="Launch interactive web GUI or desktop GUI")
+    p_gui.add_argument("--host", default=loopback_host, help="Host interface to bind")
+    p_gui.add_argument("--port", type=int, default=8765, help="Port to listen on (default: 8765)")
+    p_gui.add_argument("--no-browser", action="store_true", help="Do not automatically open browser")
+    p_gui.add_argument("--tk", action="store_true", help="Launch legacy Tkinter GUI instead of Web UI")
 
     return parser
 
@@ -362,8 +367,17 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if args.command == "gui":
-        from benchwarmer.gui import launch_gui
-        launch_gui(args.db)
+        if getattr(args, "tk", False):
+            from benchwarmer.gui import launch_gui
+            launch_gui(args.db)
+            return 0
+        from benchwarmer.web.server import run_web_server
+        run_web_server(
+            host=args.host,
+            port=args.port,
+            open_browser=not args.no_browser,
+            db_path=args.db,
+        )
         return 0
 
     bw = BenchWarmer(db_path=args.db)

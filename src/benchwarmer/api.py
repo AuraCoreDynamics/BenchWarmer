@@ -647,3 +647,196 @@ class BenchWarmer:
             z_score_spread=z_score_spread,
             ifeval_vs_knowledge_gap=ifeval_vs_knowledge_gap,
         )
+
+    def audit_all(self) -> List[Dict[str, Any]]:
+        """Audit all models in the database for contamination, anomalies, and Goodhart overfit."""
+        conn = self._connector.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT model_id FROM models ORDER BY model_id ASC")
+        all_ids = [row["model_id"] for row in cursor.fetchall()]
+
+        reports: List[Dict[str, Any]] = []
+        for mid in all_ids:
+            try:
+                rep = self.detect_anomalies(mid)
+                reports.append(rep.to_dict())
+            except Exception:
+                pass
+
+        reports.sort(key=lambda r: r["anomaly_score"], reverse=True)
+        return reports
+
+    def compare_multiple(self, model_ids: List[str]) -> Dict[str, Any]:
+        """Multi-model side-by-side comparative analysis with per-benchmark rankings and deltas."""
+        if not model_ids:
+            return {
+                "models": [],
+                "benchmarks": [],
+                "scores": {},
+                "raw_scores": {},
+                "best_in_class": {},
+                "rankings": {},
+                "summary": {},
+            }
+
+        resolved_records: List[ModelRecord] = []
+        for mid in model_ids:
+            rec = self.get_model(mid)
+            if rec:
+                resolved_records.append(rec)
+
+        if not resolved_records:
+            return {
+                "models": [],
+                "benchmarks": [],
+                "scores": {},
+                "raw_scores": {},
+                "best_in_class": {},
+                "rankings": {},
+                "summary": {},
+            }
+
+        hf_keys = ["ifeval", "bbh", "math_hard", "gpqa", "musr", "mmlu_pro"]
+        for r in resolved_records:
+            hf_vals = [r.scores[k] for k in hf_keys if k in r.scores]
+            if hf_vals and "hf_v2_avg" not in r.scores:
+                r.scores["hf_v2_avg"] = sum(hf_vals) / float(len(hf_vals))
+                r.raw_scores["hf_v2_avg"] = r.scores["hf_v2_avg"]
+
+        all_benchmarks: Set[str] = set()
+        for r in resolved_records:
+            all_benchmarks.update(r.scores.keys())
+
+        pref_order = ["hf_v2_avg", "arena_elo", "math_hard", "gpqa", "mmlu_pro", "bbh", "ifeval", "musr"]
+        benchmarks_sorted = [b for b in pref_order if b in all_benchmarks] + [
+            b for b in sorted(all_benchmarks) if b not in pref_order
+        ]
+
+        scores_by_bench: Dict[str, Dict[str, float]] = {b: {} for b in benchmarks_sorted}
+        raw_scores_by_bench: Dict[str, Dict[str, float]] = {b: {} for b in benchmarks_sorted}
+        best_in_class: Dict[str, Dict[str, Any]] = {}
+        rankings_by_bench: Dict[str, List[Dict[str, Any]]] = {}
+
+        wins_count: Dict[str, int] = {r.model_id: 0 for r in resolved_records}
+        score_sums: Dict[str, float] = {r.model_id: 0.0 for r in resolved_records}
+        score_counts: Dict[str, int] = {r.model_id: 0 for r in resolved_records}
+
+        for bench in benchmarks_sorted:
+            bench_scores: List[Tuple[str, float]] = []
+            for r in resolved_records:
+                if bench in r.scores:
+                    s = r.scores[bench]
+                    bench_scores.append((r.model_id, s))
+                    scores_by_bench[bench][r.model_id] = s
+                    score_sums[r.model_id] += s
+                    score_counts[r.model_id] += 1
+                if bench in r.raw_scores:
+                    raw_scores_by_bench[bench][r.model_id] = r.raw_scores[bench]
+
+            bench_scores.sort(key=lambda x: x[1], reverse=True)
+            if bench_scores:
+                top_mid, top_val = bench_scores[0]
+                best_in_class[bench] = {"model_id": top_mid, "score": top_val}
+                top_winners = [mid for mid, val in bench_scores if val == top_val]
+                for w in top_winners:
+                    wins_count[w] += 1
+
+            rankings_by_bench[bench] = [
+                {"rank": idx + 1, "model_id": mid, "score": val}
+                for idx, (mid, val) in enumerate(bench_scores)
+            ]
+
+        summary: Dict[str, Dict[str, Any]] = {}
+        for r in resolved_records:
+            mid = r.model_id
+            cnt = score_counts[mid]
+            avg_score = (score_sums[mid] / float(cnt)) if cnt > 0 else 0.0
+            summary[mid] = {
+                "model_id": mid,
+                "model_name": r.model_name,
+                "org": r.org,
+                "params_b": r.params_b,
+                "architecture": r.architecture,
+                "vram_bf16": r.estimated_vram_gb.get("bf16", 0.0),
+                "wins": wins_count[mid],
+                "avg_score": avg_score,
+                "context_length": r.context_length,
+                "license": r.license,
+            }
+
+        return {
+            "models": [r.to_dict() for r in resolved_records],
+            "benchmarks": benchmarks_sorted,
+            "scores": scores_by_bench,
+            "raw_scores": raw_scores_by_bench,
+            "best_in_class": best_in_class,
+            "rankings": rankings_by_bench,
+            "summary": summary,
+        }
+
+    def get_all_models_detailed(self) -> List[Dict[str, Any]]:
+        """Retrieve all models with metadata, leaderboard summary, and precomputed VRAM."""
+        conn = self._connector.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT
+                m.model_id, m.org, m.model_name, m.base_model, m.params_b, m.active_params_b,
+                m.context_length, m.architecture, m.license, m.precision, m.is_moe,
+                v.ifeval, v.bbh, v.math_hard, v.gpqa, v.musr, v.mmlu_pro,
+                v.arena_elo_raw, v.arena_elo_norm, v.hf_v2_avg
+            FROM models m
+            LEFT JOIN v_leaderboard_summary v ON m.model_id = v.model_id
+            ORDER BY v.hf_v2_avg DESC NULLS LAST
+            """
+        )
+        rows = cursor.fetchall()
+        models_list: List[Dict[str, Any]] = []
+
+        for row in rows:
+            params_b = float(row["params_b"]) if row["params_b"] is not None else None
+            active_params_b = (
+                float(row["active_params_b"]) if row["active_params_b"] is not None else params_b
+            )
+
+            vram_map: Dict[str, float] = {}
+            for quant_key, bits in QUANT_BITS_MAP.items():
+                if params_b is not None:
+                    vram_map[quant_key] = (params_b * (bits / 8.0)) * 1.15
+                else:
+                    vram_map[quant_key] = 0.0
+
+            scores: Dict[str, Optional[float]] = {
+                "ifeval": float(row["ifeval"]) if row["ifeval"] is not None else None,
+                "bbh": float(row["bbh"]) if row["bbh"] is not None else None,
+                "math_hard": float(row["math_hard"]) if row["math_hard"] is not None else None,
+                "gpqa": float(row["gpqa"]) if row["gpqa"] is not None else None,
+                "musr": float(row["musr"]) if row["musr"] is not None else None,
+                "mmlu_pro": float(row["mmlu_pro"]) if row["mmlu_pro"] is not None else None,
+                "arena_elo": float(row["arena_elo_norm"]) if row["arena_elo_norm"] is not None else None,
+            }
+
+            models_list.append(
+                {
+                    "model_id": row["model_id"],
+                    "org": row["org"],
+                    "model_name": row["model_name"],
+                    "base_model": row["base_model"],
+                    "params_b": params_b,
+                    "active_params_b": active_params_b,
+                    "context_length": row["context_length"],
+                    "architecture": row["architecture"],
+                    "license": row["license"],
+                    "precision": row["precision"],
+                    "is_moe": bool(row["is_moe"]),
+                    "estimated_vram_gb": vram_map,
+                    "scores": scores,
+                    "raw_scores": {
+                        "arena_elo": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
+                    },
+                    "hf_v2_avg": float(row["hf_v2_avg"]) if row["hf_v2_avg"] is not None else None,
+                    "arena_elo_raw": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
+                }
+            )
+
+        return models_list

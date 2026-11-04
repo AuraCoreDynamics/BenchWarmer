@@ -32,4 +32,5 @@ benchwarmer = [
     "data/checksum.sha256",
     "db/schema.sql",
     "mcp_schema.json",
+    "web/static/*",
 ]

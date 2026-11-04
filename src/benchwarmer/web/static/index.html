@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BenchWarmer - Offline LLM Benchmark Oracle & Pareto Routing</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="brand-logo">⚡</div>
+      <div>
+        <div class="brand-title">
+          BenchWarmer
+          <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
+          <span class="badge badge-green" id="badge-model-count">46 Models</span>
+        </div>
+        <div class="brand-subtitle" id="header-sha">Offline Zero-Dependency LLM Benchmark Oracle & Pareto Routing</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" id="btn-open-pareto">📈 Pareto Frontier</button>
+      <button class="btn" id="btn-open-audit">🛡️ Contamination Audit</button>
+      <button class="btn" id="btn-open-scorer">⚖️ Custom Scorer</button>
+      <button class="btn btn-accent" id="btn-open-compare" disabled>⚖️ Compare (<span id="compare-count">0</span>)</button>
+      <button class="btn" id="btn-export-table">📥 Export</button>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="main-content">
+
+    <!-- View Preset Switcher -->
+    <div class="view-tabs">
+      <button class="tab-btn active" data-view="leaderboard">🏆 Leaderboard</button>
+      <button class="tab-btn" data-view="all">📊 All Benchmarks</button>
+      <button class="tab-btn" data-view="math">🧮 Math & Reasoning</button>
+      <button class="tab-btn" data-view="code">💻 Coding & IFEval</button>
+      <button class="tab-btn" data-view="hardware">⚡ Hardware & VRAM</button>
+    </div>
+
+    <!-- Toolbar Filters -->
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Search models, orgs, architectures...">
+        </div>
+
+        <label class="range-control">
+          <span>Quant:</span>
+          <select id="quant-select" class="select-control">
+            <option value="bf16" selected>BF16 (16-bit)</option>
+            <option value="q8_0">Q8_0 (8.5-bit)</option>
+            <option value="q6_k">Q6_K (6.6-bit)</option>
+            <option value="q5_k_m">Q5_K_M (5.7-bit)</option>
+            <option value="q4_k_m">Q4_K_M (4.8-bit)</option>
+            <option value="q4_0">Q4_0 (4.5-bit)</option>
+            <option value="q3_k_m">Q3_K_M (3.9-bit)</option>
+            <option value="q2_k">Q2_K (2.9-bit)</option>
+            <option value="fp16">FP16 (16-bit)</option>
+            <option value="fp32">FP32 (32-bit)</option>
+          </select>
+        </label>
+
+        <label class="range-control">
+          <span>Max VRAM:</span>
+          <input type="range" id="vram-slider" class="range-input" min="0" max="320" step="4" value="320">
+          <span class="num-badge" id="vram-val">All</span>
+        </label>
+
+        <label class="range-control">
+          <span>Params (B):</span>
+          <input type="number" id="min-params" class="select-control" placeholder="Min" style="width: 70px;">
+          <span>to</span>
+          <input type="number" id="max-params" class="select-control" placeholder="Max" style="width: 70px;">
+        </label>
+      </div>
+
+      <div class="toolbar-group">
+        <button class="btn btn-sm" id="btn-reset-filters">Reset Filters</button>
+        <span class="text-secondary" style="font-size: 12px;" id="match-count">46 models displayed</span>
+      </div>
+    </div>
+
+    <div class="tip-banner">
+      <span>💡</span>
+      <span><strong>Double-click</strong> any model to open its full Scorecard with SVG radar chart and VRAM matrix, or <strong>right-click</strong> for context actions.</span>
+    </div>
+
+    <!-- Models Table Container -->
+    <div class="table-container">
+      <table class="models-table" id="models-table">
+        <thead id="table-head">
+          <!-- Dynamic headers rendered by app.js based on active view preset -->
+        </thead>
+        <tbody id="table-body">
+          <!-- Model rows rendered by app.js -->
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <!-- Modal 1: Model Scorecard Modal -->
+  <div class="modal-overlay" id="modal-scorecard">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span id="sc-model-name">Model Name</span>
+          <span class="badge badge-cyan" id="sc-org-badge">Org</span>
+          <span class="badge" id="sc-params-badge">70B</span>
+          <span class="badge" id="sc-arch-badge">LlamaForCausalLM</span>
+        </div>
+        <button class="modal-close" data-close="modal-scorecard">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Top Charts Grid -->
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">Capability Radar Profile (0 - 100)</div>
+            <svg id="sc-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="chart-title">Benchmark Evaluations</div>
+            <div class="metric-cards-grid" id="sc-metric-cards">
+              <!-- Rendered dynamically -->
+            </div>
+            <!-- Contamination Diagnosis Card -->
+            <div id="sc-audit-card" style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-weight: 600; font-size: 12px; text-transform: uppercase;">Benchmark Integrity & Anomaly Risk</span>
+                <span class="badge" id="sc-audit-badge">CLEAN</span>
+              </div>
+              <div id="sc-audit-desc" style="font-size: 12px; color: var(--text-secondary);">No contamination flags detected.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VRAM Quantization Matrix -->
+        <div>
+          <div class="chart-title" style="margin-bottom: 8px;">VRAM Footprint across Quantizations (+15% Overhead)</div>
+          <table class="sub-table" id="sc-vram-table">
+            <thead>
+              <tr>
+                <th>Quantization</th>
+                <th>Bits / Weight</th>
+                <th>Estimated VRAM</th>
+                <th>Target Hardware Tier</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="sc-btn-compare-toggle">Add to Comparison</button>
+        <button class="btn btn-primary" data-close="modal-scorecard">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Multi-Model Compare Modal -->
+  <div class="modal-overlay" id="modal-compare">
+    <div class="modal-card" style="max-width: 1080px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          ⚖️ Multi-Model Comparative Infograph
+          <span class="badge badge-purple" id="cmp-model-count">3 Models</span>
+        </div>
+        <button class="modal-close" data-close="modal-compare">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">Multi-Model Radar Comparison</div>
+            <svg id="cmp-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+            <div id="cmp-radar-legend" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; font-size: 12px;"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Per-Benchmark Performance Comparison</div>
+            <div id="cmp-bars-container" style="width: 100%; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 320px;"></div>
+          </div>
+        </div>
+
+        <!-- Spec Comparison Table -->
+        <div>
+          <div class="chart-title" style="margin-bottom: 8px;">Head-to-Head Specification Matrix</div>
+          <table class="sub-table" id="cmp-specs-table">
+            <thead id="cmp-specs-head"></thead>
+            <tbody id="cmp-specs-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cmp-btn-copy-md">📋 Copy Markdown</button>
+        <button class="btn btn-primary" data-close="modal-compare">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Pareto Frontier Modal -->
+  <div class="modal-overlay" id="modal-pareto">
+    <div class="modal-card" style="max-width: 1000px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          📈 Pareto Optimal Frontier (Capability vs VRAM Footprint)
+        </div>
+        <button class="modal-close" data-close="modal-pareto">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <label class="range-control">
+              <span>Metric:</span>
+              <select id="pareto-metric-select" class="select-control">
+                <option value="hf_v2_avg" selected>HF v2 Average</option>
+                <option value="math_hard">MATH Hard</option>
+                <option value="ifeval">IFEval (Instruction Following)</option>
+                <option value="gpqa">GPQA (Diamond Reasoning)</option>
+                <option value="mmlu_pro">MMLU-Pro</option>
+                <option value="bbh">BigBench Hard (BBH)</option>
+                <option value="arena_elo_raw">Arena Elo Raw</option>
+              </select>
+            </label>
+            <label class="range-control">
+              <span>Quant:</span>
+              <select id="pareto-quant-select" class="select-control">
+                <option value="bf16" selected>BF16</option>
+                <option value="q8_0">Q8_0</option>
+                <option value="q5_k_m">Q5_K_M</option>
+                <option value="q4_k_m">Q4_K_M</option>
+              </select>
+            </label>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            Frontier points (glowing cyan) dominate all models below and to their right.
+          </div>
+        </div>
+
+        <div class="chart-card" style="padding: 10px;">
+          <svg id="pareto-svg" style="width: 100%; height: 380px;" viewBox="0 0 800 360"></svg>
+        </div>
+
+        <!-- Frontier Table -->
+        <div>
+          <div class="chart-title">Frontier Optimal Models</div>
+          <table class="sub-table" id="pareto-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Params (B)</th>
+                <th>Estimated VRAM</th>
+                <th>Score</th>
+                <th>Efficiency Ratio (Score / GB)</th>
+              </tr>
+            </thead>
+            <tbody id="pareto-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modal-pareto">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Contamination Audit Modal -->
+  <div class="modal-overlay" id="modal-audit">
+    <div class="modal-card" style="max-width: 960px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          🛡️ Benchmark Contamination & Overfit Anomaly Audit
+        </div>
+        <button class="modal-close" data-close="modal-audit">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 13px; color: var(--text-secondary);">
+          Automated scanner detecting synthetic Goodhart traps, reasoning cliffs (BBH vs MATH divergence), severe IFEval instruction-following cliffs, and statistical cross-benchmark z-score anomalies within parameter peer groups.
+        </div>
+        <table class="sub-table" id="audit-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Model ID</th>
+              <th>Risk Score</th>
+              <th>Z-Score Spread</th>
+              <th>IFEval Gap</th>
+              <th>Diagnostic Triggers</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modal-audit">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Custom Scorer Modal -->
+  <div class="modal-overlay" id="modal-scorer">
+    <div class="modal-card" style="max-width: 900px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          ⚖️ Custom Weighted Benchmark Scorer
+        </div>
+        <button class="modal-close" data-close="modal-scorer">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 13px; color: var(--text-secondary);">
+          Adjust weight sliders to align model rankings with your specific workload priorities:
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;" id="scorer-weights-grid">
+          <!-- Dynamic weight sliders -->
+        </div>
+        <div style="margin-top: 10px;">
+          <div class="chart-title">Weighted Model Ranking</div>
+          <table class="sub-table" id="scorer-results-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Model</th>
+                <th>Weighted Score</th>
+                <th>Params</th>
+              </tr>
+            </thead>
+            <tbody id="scorer-results-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modal-scorer">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right-Click Context Menu -->
+  <div class="context-menu" id="context-menu">
+    <div class="context-menu-item" id="ctx-open-scorecard">🔍 View Scorecard</div>
+    <div class="context-menu-item" id="ctx-toggle-compare">⚖️ Toggle in Compare</div>
+    <div class="context-menu-item" id="ctx-audit-model">🛡️ Audit Contamination</div>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-item" id="ctx-copy-id">📋 Copy Model ID</div>
+    <div class="context-menu-item" id="ctx-copy-markdown">📝 Copy Specs as Markdown</div>
+  </div>
+
+  <!-- Floating Tooltip -->
+  <div class="tooltip" id="tooltip"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

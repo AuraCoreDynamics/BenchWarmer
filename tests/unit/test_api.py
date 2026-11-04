@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "1427")
+        self.assertEqual(meta.get("model_count"), "1431")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -190,13 +190,13 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 1427)
+        self.assertEqual(len(all_audits), 1431)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 1427)
+        self.assertEqual(len(detailed), 1431)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
 

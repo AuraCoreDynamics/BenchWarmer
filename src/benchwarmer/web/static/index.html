@@ -16,7 +16,7 @@
         <div class="brand-title">
           BenchWarmer
           <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
-          <span class="badge badge-green" id="badge-model-count">1,427 Models</span>
+          <span class="badge badge-green" id="badge-model-count">1,431 Models</span>
         </div>
         <div class="brand-subtitle" id="header-built-date">Current as of November 2026</div>
       </div>
@@ -96,13 +96,40 @@
           <input type="number" id="max-params" class="select-control" placeholder="Max" style="width: 70px;">
         </label>
 
+        <label class="range-control">
+          <span>Provider:</span>
+          <select id="org-filter-select" class="select-control" style="max-width: 140px;">
+            <option value="">All Providers</option>
+          </select>
+        </label>
+
+        <label class="range-control">
+          <span>License:</span>
+          <select id="license-filter-select" class="select-control" style="max-width: 130px;">
+            <option value="">All Licenses</option>
+          </select>
+        </label>
+
         <button class="btn btn-sm" id="btn-toggle-adv-filter">🎯 Benchmark Filters</button>
       </div>
 
       <div class="toolbar-group">
         <button class="btn btn-sm" id="btn-reset-filters">Reset Filters</button>
-        <span class="text-secondary" style="font-size: 12px;" id="match-count">80 models displayed</span>
+        <span class="text-secondary" style="font-size: 12px;" id="match-count">1,431 models displayed</span>
       </div>
+    </div>
+
+    <!-- Active Filter Chips -->
+    <div class="active-filter-chips" id="active-filter-chips" style="display: none;">
+      <span style="font-size: 11px; color: var(--text-secondary); margin-right: 4px;">Active Filters:</span>
+      <span id="active-org-chip" class="filter-chip" style="display: none;">
+        <span>Provider: <strong id="active-org-text"></strong></span>
+        <button class="chip-close" id="btn-clear-org-chip" title="Clear provider filter (or right-click provider in table)">✕</button>
+      </span>
+      <span id="active-license-chip" class="filter-chip chip-license" style="display: none;">
+        <span>License: <strong id="active-license-text"></strong></span>
+        <button class="chip-close" id="btn-clear-license-chip" title="Clear license filter (or right-click license in table)">✕</button>
+      </span>
     </div>
 
     <!-- Advanced Filters Expandable Panel -->

@@ -94,6 +94,8 @@
     },
     currentPage: 1,
     pageSize: 50,
+    orgFilter: "",
+    licenseFilter: "",
     contextTargetId: null
   };
 
@@ -211,6 +213,7 @@
       document.getElementById("header-built-date").textContent = `Current as of ${builtAt}`;
 
       populateBeatModelSelect();
+      populateOrgAndLicenseSelects();
       setupEventListeners();
       renderScorerSliders();
       renderTable();
@@ -226,11 +229,117 @@
       sorted.map(m => `<option value="${m.model_id}">${m.model_name} (${m.org}${m.params_b ? `, ${m.params_b.toFixed(1)}B` : ''})</option>`).join("");
   }
 
+  function populateOrgAndLicenseSelects() {
+    const orgCounts = {};
+    const licenseCounts = {};
+
+    state.models.forEach(m => {
+      const org = m.org || "unknown";
+      orgCounts[org] = (orgCounts[org] || 0) + 1;
+
+      const lic = m.license || "other";
+      licenseCounts[lic] = (licenseCounts[lic] || 0) + 1;
+    });
+
+    const sortedOrgs = Object.keys(orgCounts).sort((a, b) => {
+      if (orgCounts[b] !== orgCounts[a]) return orgCounts[b] - orgCounts[a];
+      return a.localeCompare(b);
+    });
+
+    const orgSel = document.getElementById("org-filter-select");
+    if (orgSel) {
+      orgSel.innerHTML = `<option value="">All Providers (${state.models.length})</option>` +
+        sortedOrgs.map(org => `<option value="${org}">${org} (${orgCounts[org]})</option>`).join("");
+      if (state.orgFilter) orgSel.value = state.orgFilter;
+    }
+
+    const sortedLicenses = Object.keys(licenseCounts).sort((a, b) => {
+      if (licenseCounts[b] !== licenseCounts[a]) return licenseCounts[b] - licenseCounts[a];
+      return a.localeCompare(b);
+    });
+
+    const licSel = document.getElementById("license-filter-select");
+    if (licSel) {
+      licSel.innerHTML = `<option value="">All Licenses</option>` +
+        sortedLicenses.map(lic => `<option value="${lic}">${lic} (${licenseCounts[lic]})</option>`).join("");
+      if (state.licenseFilter) licSel.value = state.licenseFilter;
+    }
+  }
+
+  function updateActiveFilterChips() {
+    const container = document.getElementById("active-filter-chips");
+    const orgChip = document.getElementById("active-org-chip");
+    const orgText = document.getElementById("active-org-text");
+    const licChip = document.getElementById("active-license-chip");
+    const licText = document.getElementById("active-license-text");
+
+    let hasActive = false;
+
+    if (state.orgFilter) {
+      hasActive = true;
+      if (orgText) orgText.textContent = state.orgFilter;
+      if (orgChip) orgChip.style.display = "inline-flex";
+    } else {
+      if (orgChip) orgChip.style.display = "none";
+    }
+
+    if (state.licenseFilter) {
+      hasActive = true;
+      if (licText) licText.textContent = state.licenseFilter;
+      if (licChip) licChip.style.display = "inline-flex";
+    } else {
+      if (licChip) licChip.style.display = "none";
+    }
+
+    if (container) {
+      container.style.display = hasActive ? "flex" : "none";
+    }
+
+    // Keep dropdown selects synchronized
+    const orgSel = document.getElementById("org-filter-select");
+    if (orgSel && orgSel.value !== state.orgFilter) {
+      orgSel.value = state.orgFilter;
+    }
+    const licSel = document.getElementById("license-filter-select");
+    if (licSel && licSel.value !== state.licenseFilter) {
+      licSel.value = state.licenseFilter;
+    }
+  }
+
+  function setOrgFilter(org) {
+    state.orgFilter = (state.orgFilter.toLowerCase() === org.toLowerCase()) ? "" : org;
+    state.currentPage = 1;
+    renderTable();
+  }
+
+  function clearOrgFilter() {
+    state.orgFilter = "";
+    state.currentPage = 1;
+    renderTable();
+  }
+
+  function setLicenseFilter(lic) {
+    state.licenseFilter = (state.licenseFilter.toLowerCase() === lic.toLowerCase()) ? "" : lic;
+    state.currentPage = 1;
+    renderTable();
+  }
+
+  function clearLicenseFilter() {
+    state.licenseFilter = "";
+    state.currentPage = 1;
+    renderTable();
+  }
+
+
   // --- Filtering & Sorting ---
   function getFilteredModels() {
     const beatRef = state.beatModelId ? state.models.find(m => m.model_id === state.beatModelId) : null;
 
     return state.models.filter(m => {
+      // 0. Provider and License filters
+      if (state.orgFilter && m.org.toLowerCase() !== state.orgFilter.toLowerCase()) return false;
+      if (state.licenseFilter && (m.license || "").toLowerCase() !== state.licenseFilter.toLowerCase()) return false;
+
       // 1. Parameter range filter
       if (state.minParams !== null && (m.params_b === null || m.params_b < state.minParams)) return false;
       if (state.maxParams !== null && (m.params_b === null || m.params_b > state.maxParams)) return false;
@@ -480,10 +589,10 @@
         } else if (col.key === "rank") {
           rowsHtml += `<td><span class="badge ${globalIdx < 3 ? 'badge-amber' : ''}">#${globalIdx + 1}</span></td>`;
         } else if (col.key === "model_id") {
-          const orgBadge = `<span class="org-tag">${m.org}</span>`;
+          const orgBadge = `<span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span>`;
           rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span>${m.model_name}</span></div></td>`;
         } else if (col.key === "org") {
-          rowsHtml += `<td><span class="badge">${m.org}</span></td>`;
+          rowsHtml += `<td><span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span></td>`;
         } else if (col.key === "custom_score") {
           const cs = computeCustomScore(m);
           const barW = Math.min(60, Math.round(cs * 0.6));
@@ -518,6 +627,9 @@
           rowsHtml += `<td><span class="badge">${ctxDisp}</span></td>`;
         } else if (col.key === "is_moe") {
           rowsHtml += `<td><span class="badge ${m.is_moe ? "badge-amber" : ""}">${m.is_moe ? "MoE" : "Dense"}</span></td>`;
+        } else if (col.key === "license") {
+          const lic = m.license || "other";
+          rowsHtml += `<td><span class="license-tag clickable-filter" data-license="${lic}" title="Click to filter by license: ${lic} (Right-click to clear)">${lic}</span></td>`;
         } else {
           rowsHtml += `<td>${m[col.key] || "-"}</td>`;
         }
@@ -528,6 +640,7 @@
 
     tbody.innerHTML = rowsHtml;
     updateCompareButton();
+    updateActiveFilterChips();
   }
 
   function updateCompareButton() {
@@ -1029,6 +1142,8 @@
       state.maxParams = null;
       state.currentQuant = "bf16";
       state.beatModelId = null;
+      state.orgFilter = "";
+      state.licenseFilter = "";
       state.currentPage = 1;
       Object.keys(state.benchmarkThresholds).forEach(k => {
         state.benchmarkThresholds[k] = null;
@@ -1042,6 +1157,10 @@
       document.getElementById("quant-select").value = "bf16";
       document.getElementById("beat-model-select").value = "";
       document.getElementById("beat-status-badge").style.display = "none";
+      const orgSel = document.getElementById("org-filter-select");
+      if (orgSel) orgSel.value = "";
+      const licSel = document.getElementById("license-filter-select");
+      if (licSel) licSel.value = "";
 
       ["ifeval", "math", "gpqa", "bbh", "mmlu", "musr", "elo"].forEach(k => {
         const inp = document.getElementById(`min-${k}`);
@@ -1050,6 +1169,41 @@
 
       renderTable();
     };
+
+    // 6b. Provider & License Filters & Chip Event Listeners
+    const orgSel = document.getElementById("org-filter-select");
+    if (orgSel) {
+      orgSel.onchange = (e) => {
+        state.orgFilter = e.target.value;
+        state.currentPage = 1;
+        renderTable();
+      };
+    }
+
+    const licSel = document.getElementById("license-filter-select");
+    if (licSel) {
+      licSel.onchange = (e) => {
+        state.licenseFilter = e.target.value;
+        state.currentPage = 1;
+        renderTable();
+      };
+    }
+
+    const btnClearOrgChip = document.getElementById("btn-clear-org-chip");
+    if (btnClearOrgChip) {
+      btnClearOrgChip.onclick = (e) => {
+        e.stopPropagation();
+        clearOrgFilter();
+      };
+    }
+
+    const btnClearLicChip = document.getElementById("btn-clear-license-chip");
+    if (btnClearLicChip) {
+      btnClearLicChip.onclick = (e) => {
+        e.stopPropagation();
+        clearLicenseFilter();
+      };
+    }
 
 
     // 7. Toggle Advanced Filters Panel
@@ -1193,8 +1347,24 @@
       }
     };
 
-    // Single click handles checkboxes or row highlighting WITHOUT re-rendering entire table
+    // Single click handles checkboxes, clickable tags, or row highlighting WITHOUT re-rendering entire table
     tbody.onclick = (e) => {
+      // Click on org-tag: auto-filter by provider
+      const orgTag = e.target.closest(".org-tag[data-org]");
+      if (orgTag) {
+        e.stopPropagation();
+        setOrgFilter(orgTag.dataset.org);
+        return;
+      }
+
+      // Click on license-tag: auto-filter by license
+      const licTag = e.target.closest(".license-tag[data-license]");
+      if (licTag) {
+        e.stopPropagation();
+        setLicenseFilter(licTag.dataset.license);
+        return;
+      }
+
       const cb = e.target.closest(".row-select-cb");
       if (cb) {
         const mid = cb.dataset.id;
@@ -1217,8 +1387,26 @@
       }
     };
 
-    // Right-click context menu
+    // Right-click context menu (or right-click to clear tag filter)
     tbody.oncontextmenu = (e) => {
+      // Right-click on org-tag: clear provider filter
+      const orgTag = e.target.closest(".org-tag[data-org]");
+      if (orgTag) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearOrgFilter();
+        return;
+      }
+
+      // Right-click on license-tag: clear license filter
+      const licTag = e.target.closest(".license-tag[data-license]");
+      if (licTag) {
+        e.preventDefault();
+        e.stopPropagation();
+        clearLicenseFilter();
+        return;
+      }
+
       const tr = e.target.closest("tr");
       if (tr && tr.dataset.modelId) {
         showContextMenu(e, tr.dataset.modelId);

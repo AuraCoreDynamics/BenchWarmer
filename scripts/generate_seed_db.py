@@ -226,6 +226,40 @@ MODELS_SEED_DATA = [
     },
     # --- OpenAI Open-Source Weights Models ---
     {
+        "model_id": "openai/gpt-oss-120b",
+        "org": "openai",
+        "model_name": "gpt-oss-120b",
+        "base_model": None,
+        "params_b": 117.0,
+        "active_params_b": 5.1,
+        "context_length": 131072,
+        "architecture": "GptOssForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 90.20, "bbh": 92.40, "math_hard": 94.80,
+            "gpqa": 80.10, "musr": 70.50, "mmlu_pro": 90.00, "arena_elo": 1365.0
+        }
+    },
+    {
+        "model_id": "openai/gpt-oss-20b",
+        "org": "openai",
+        "model_name": "gpt-oss-20b",
+        "base_model": None,
+        "params_b": 21.0,
+        "active_params_b": 3.6,
+        "context_length": 131072,
+        "architecture": "GptOssForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 84.50, "bbh": 86.80, "math_hard": 88.50,
+            "gpqa": 71.50, "musr": 63.00, "mmlu_pro": 84.00, "arena_elo": 1285.0
+        }
+    },
+    {
         "model_id": "openai/gpt2-xl",
         "org": "openai",
         "model_name": "gpt2-xl",
@@ -240,6 +274,40 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 12.00, "bbh": 28.40, "math_hard": 2.10,
             "gpqa": 18.00, "musr": 22.00, "mmlu_pro": 10.50, "arena_elo": 850.0
+        }
+    },
+    {
+        "model_id": "openai/gpt2-large",
+        "org": "openai",
+        "model_name": "gpt2-large",
+        "base_model": None,
+        "params_b": 0.77,
+        "active_params_b": 0.77,
+        "context_length": 1024,
+        "architecture": "GPT2LMHeadModel",
+        "license": "mit",
+        "precision": "FP32",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 9.80, "bbh": 24.50, "math_hard": 1.50,
+            "gpqa": 16.00, "musr": 19.50, "mmlu_pro": 9.00, "arena_elo": 835.0
+        }
+    },
+    {
+        "model_id": "openai/gpt2-medium",
+        "org": "openai",
+        "model_name": "gpt2-medium",
+        "base_model": None,
+        "params_b": 0.35,
+        "active_params_b": 0.35,
+        "context_length": 1024,
+        "architecture": "GPT2LMHeadModel",
+        "license": "mit",
+        "precision": "FP32",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 7.50, "bbh": 20.10, "math_hard": 1.10,
+            "gpqa": 14.00, "musr": 17.00, "mmlu_pro": 7.80, "arena_elo": 820.0
         }
     },
     {

@@ -537,12 +537,93 @@ body {
 .org-tag {
   font-size: 10px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
 }
+
+.org-tag:hover {
+  background: var(--accent-cyan-dim);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.license-tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.license-tag:hover {
+  background: var(--accent-purple-dim);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+.clickable-filter {
+  cursor: pointer;
+}
+
+/* Active Filter Chips */
+.active-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: var(--accent-cyan-dim);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.filter-chip .chip-close {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--accent-cyan);
+  font-weight: bold;
+  font-size: 12px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.filter-chip.chip-license {
+  background: var(--accent-purple-dim);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
+.filter-chip.chip-license .chip-close {
+  color: var(--accent-purple);
+}
+
 
 .score-num {
   font-family: var(--font-mono);

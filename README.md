@@ -17,7 +17,17 @@ BenchWarmer is a high-speed, strictly offline, zero-runtime-dependency benchmark
 - **Embedded Read-Only SQLite & FTS5**: Packaged with a pre-indexed `benchmarks.db` featuring 4-stage resolution cascade: exact match → case-insensitive → org-stripped → FTS5 BM25 rank.
 - **Micro-Precision Invariance**: Normalized benchmark metrics stored as full 64-bit IEEE 754 floats (`REAL`). Never prematurely rounds internal math.
 - **Single-File `.pyz` Executable**: Portable zipapp bundle compiled via `python scripts/make_zipapp.py`.
-- **Tri-Interface Support**: Queryable as an in-process Python library (for model routers like `aurarouter`), a command-line interface, a headless-safe Tkinter desktop GUI, or a Stdio JSON-RPC 2.0 Model Context Protocol (MCP) server.
+- **Tri-Interface Support**: Queryable as an in-process Python library (for model routers like `aurarouter`), a command-line interface, a rich dark-themed Web GUI with SVG radar and Pareto charts, or a Stdio JSON-RPC 2.0 Model Context Protocol (MCP) server.
+
+---
+
+## Interactive Web User Interface
+
+BenchWarmer features a responsive, dark-themed Web UI for deep-dive benchmark exploration, multi-model comparison, hardware Pareto routing, and contamination auditing:
+
+[![BenchWarmer Web UI](docs/screenshots/01_leaderboard_overview.png)](docs/USER_INTERFACE_EXAMPLES.md)
+
+*See the complete [User Interface Visual Guide & Examples](docs/USER_INTERFACE_EXAMPLES.md) for full walkthroughs of radar scorecards, multi-model comparison charts, Pareto frontiers, and custom weighted scoring.*
 
 ---
 
@@ -128,17 +138,41 @@ See [docs/MCP_GUIDE.md](docs/MCP_GUIDE.md) for full configuration details.
 
 ---
 
-## Desktop GUI
+## Graphical User Interface (GUI)
 
-Launch the 3-tab graphical comparator and leaderboard:
+BenchWarmer provides both a modern browser-based Web GUI and a fallback Tkinter desktop client:
 
 ```bash
+# Launch the interactive Web GUI (auto-opens browser)
 benchwarmer gui
+
+# Or launch directly with custom host/port:
+python -m benchwarmer.web.server --port 8765
 ```
 
-- **Tab 1: Leaderboard & Search**: Filter models by parameter size and VRAM footprint with instant FTS search.
-- **Tab 2: Side-by-Side Comparator**: Delta visualization with color tags and one-click Markdown clipboard export.
-- **Tab 3: Pareto & Contamination Audit**: Interactive Pareto curve inspection and contamination diagnostics.
+### Visual Features:
+- **Leaderboard & Filters**: Explore 1,431 models with sub-second FTS search, provider/license click-to-filter, and active chip toggling.
+- **Model Scorecard Modal**: Double-click any row to view 6-axis SVG radar polygons and 10-quantization VRAM matrices.
+- **Multi-Model Comparator**: Side-by-side radar overlays, horizontal benchmark bar charts with Best-in-Class crown awards, and one-click Markdown clipboard exports.
+- **Pareto Frontier Analysis**: 2D scatter plots of capability vs. VRAM with non-dominated frontier curves and hardware tier classifications.
+- **Contamination & Overfit Audits**: Z-score spread, anomaly scores, and Goodhart overfit detection.
+- **Custom Weighted Scorer**: Real-time capability weight sliders with presets for Math, Coding, Chat, and Balanced tasks.
+
+For a full screenshot gallery and walkthrough, see [User Interface Visual Guide & Examples](docs/USER_INTERFACE_EXAMPLES.md).
+
+---
+
+## Automated Selenium UI Testing & Screenshot Capture
+
+BenchWarmer includes an automated Selenium test harness that validates DOM elements, SVG charts, modals, and tag filters, while programmatically capturing high-resolution screenshots for documentation:
+
+```bash
+# Execute headless Selenium tests and refresh documentation screenshots:
+python scripts/capture_screenshots.py
+
+# Or via standard unittest:
+python -m unittest tests/unit/test_selenium_ui.py
+```
 
 ---
 

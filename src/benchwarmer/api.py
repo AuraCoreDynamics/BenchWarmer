@@ -498,7 +498,7 @@ class BenchWarmer:
             SELECT m.model_id, m.params_b, v.{metric_col} AS score
             FROM models m
             JOIN v_leaderboard_summary v ON m.model_id = v.model_id
-            WHERE m.params_b IS NOT NULL AND v.{metric_col} IS NOT NULL
+            WHERE m.params_b IS NOT NULL AND m.params_b > 0 AND v.{metric_col} IS NOT NULL
             """
         )
 

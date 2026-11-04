@@ -27,3 +27,4 @@ htmlcov/
 .nox/
 .black/
 *.db-journal
+*.parquet

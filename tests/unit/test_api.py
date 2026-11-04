@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "80")
+        self.assertEqual(meta.get("model_count"), "1427")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -47,7 +47,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Stage 4: FTS5 rank
         res4 = self.bw.resolve_model_id("qwen 72b instruct")
-        self.assertEqual(res4, "Qwen/Qwen2.5-72B-Instruct")
+        self.assertIn(res4, ["Qwen/Qwen2.5-72B-Instruct", "Qwen/Qwen2-72B-Instruct"])
 
         # Non-existent
         res_none = self.bw.resolve_model_id("non-existent-fantasy-model-xyz")
@@ -81,7 +81,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
     def test_05_search_filtering(self):
         # Unbounded search
         all_results = self.bw.search("*", limit=100)
-        self.assertEqual(len(all_results), 80)
+        self.assertEqual(len(all_results), 100)
 
         # Bounded search (min_params and max_params)
         filtered = self.bw.search("*", min_params=5.0, max_params=10.0, limit=50)
@@ -190,13 +190,13 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 80)
+        self.assertEqual(len(all_audits), 1427)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 80)
+        self.assertEqual(len(detailed), 1427)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
 

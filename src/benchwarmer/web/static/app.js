@@ -92,6 +92,8 @@
       musr: null,
       arena_elo: null
     },
+    currentPage: 1,
+    pageSize: 50,
     contextTargetId: null
   };
 
@@ -203,7 +205,7 @@
       state.models = modelsRes;
 
       const modelCount = modelsRes.length;
-      document.getElementById("badge-model-count").textContent = `${modelCount} Models`;
+      document.getElementById("badge-model-count").textContent = `${modelCount.toLocaleString()} Models`;
 
       const builtAt = metaRes.built_at || "November 2026";
       document.getElementById("header-built-date").textContent = `Current as of ${builtAt}`;
@@ -421,16 +423,54 @@
     thead.innerHTML = headHtml;
 
     // Render Rows
-    const models = getSortedModels();
-    document.getElementById("match-count").textContent = `${models.length} of ${state.models.length} models displayed`;
+    const allModels = getSortedModels();
+    const totalCount = allModels.length;
 
-    if (models.length === 0) {
+    // Pagination calculations
+    const pageSize = state.pageSize === "all" ? totalCount : parseInt(state.pageSize, 10);
+    const totalPages = Math.max(1, Math.ceil(totalCount / (pageSize || 1)));
+    if (state.currentPage > totalPages) state.currentPage = totalPages;
+    if (state.currentPage < 1) state.currentPage = 1;
+
+    const startIdx = (state.currentPage - 1) * pageSize;
+    const endIdx = state.pageSize === "all" ? totalCount : Math.min(totalCount, startIdx + pageSize);
+    const pageModels = allModels.slice(startIdx, endIdx);
+
+    // Update match count & pagination display
+    const matchCountEl = document.getElementById("match-count");
+    if (matchCountEl) {
+      matchCountEl.textContent = `${totalCount} of ${state.models.length} models displayed`;
+    }
+
+    const pagInfo = document.getElementById("pagination-info");
+    if (pagInfo) {
+      pagInfo.textContent = totalCount > 0 
+        ? `Showing ${startIdx + 1}–${endIdx} of ${totalCount} models` 
+        : `Showing 0 of 0 models`;
+    }
+
+    const pageInd = document.getElementById("page-indicator");
+    if (pageInd) {
+      pageInd.textContent = `Page ${state.currentPage} of ${totalPages}`;
+    }
+
+    const btnFirst = document.getElementById("btn-first-page");
+    const btnPrev = document.getElementById("btn-prev-page");
+    const btnNext = document.getElementById("btn-next-page");
+    const btnLast = document.getElementById("btn-last-page");
+    if (btnFirst) btnFirst.disabled = state.currentPage <= 1;
+    if (btnPrev) btnPrev.disabled = state.currentPage <= 1;
+    if (btnNext) btnNext.disabled = state.currentPage >= totalPages;
+    if (btnLast) btnLast.disabled = state.currentPage >= totalPages;
+
+    if (totalCount === 0) {
       tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align: center; padding: 32px; color: var(--text-secondary);">No models matched your filter criteria. Try clicking "Reset Filters".</td></tr>`;
       return;
     }
 
     let rowsHtml = "";
-    models.forEach((m, idx) => {
+    pageModels.forEach((m, idxOnPage) => {
+      const globalIdx = startIdx + idxOnPage;
       const isSelected = state.selectedModelIds.has(m.model_id);
       rowsHtml += `<tr data-model-id="${m.model_id}" class="${isSelected ? "selected" : ""}">`;
 
@@ -438,7 +478,7 @@
         if (col.key === "select") {
           rowsHtml += `<td style="text-align: center;"><input type="checkbox" class="row-select-cb" data-id="${m.model_id}" ${isSelected ? "checked" : ""}></td>`;
         } else if (col.key === "rank") {
-          rowsHtml += `<td><span class="badge ${idx < 3 ? 'badge-amber' : ''}">#${idx + 1}</span></td>`;
+          rowsHtml += `<td><span class="badge ${globalIdx < 3 ? 'badge-amber' : ''}">#${globalIdx + 1}</span></td>`;
         } else if (col.key === "model_id") {
           const orgBadge = `<span class="org-tag">${m.org}</span>`;
           rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span>${m.model_name}</span></div></td>`;
@@ -930,6 +970,7 @@
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         state.activeView = btn.dataset.view;
+        state.currentPage = 1;
 
         if (state.activeView === "scorer") {
           state.sortKey = "custom_score";
@@ -947,12 +988,14 @@
     const searchInput = document.getElementById("search-input");
     searchInput.oninput = (e) => {
       state.searchQuery = e.target.value;
+      state.currentPage = 1;
       renderTable();
     };
 
     // 3. Quantization Selector
     document.getElementById("quant-select").onchange = (e) => {
       state.currentQuant = e.target.value;
+      state.currentPage = 1;
       renderTable();
     };
 
@@ -961,6 +1004,7 @@
     vramSlider.oninput = (e) => {
       const val = parseInt(e.target.value, 10);
       state.vramBudget = val;
+      state.currentPage = 1;
       document.getElementById("vram-val").textContent = val >= 320 ? "All" : `${val} GB`;
       renderTable();
     };
@@ -968,10 +1012,12 @@
     // 5. Parameter Range
     document.getElementById("min-params").oninput = (e) => {
       state.minParams = e.target.value ? parseFloat(e.target.value) : null;
+      state.currentPage = 1;
       renderTable();
     };
     document.getElementById("max-params").oninput = (e) => {
       state.maxParams = e.target.value ? parseFloat(e.target.value) : null;
+      state.currentPage = 1;
       renderTable();
     };
 
@@ -983,6 +1029,7 @@
       state.maxParams = null;
       state.currentQuant = "bf16";
       state.beatModelId = null;
+      state.currentPage = 1;
       Object.keys(state.benchmarkThresholds).forEach(k => {
         state.benchmarkThresholds[k] = null;
       });
@@ -1004,6 +1051,7 @@
       renderTable();
     };
 
+
     // 7. Toggle Advanced Filters Panel
     document.getElementById("btn-toggle-adv-filter").onclick = () => {
       const panel = document.getElementById("advanced-filters-panel");
@@ -1024,6 +1072,7 @@
       state.beatCriteria.mmlu_pro = document.getElementById("beat-mmlu").checked;
       state.beatCriteria.arena_elo = document.getElementById("beat-elo").checked;
       state.beatCriteria.vram = document.getElementById("beat-vram").checked;
+      state.currentPage = 1;
 
       const badge = document.getElementById("beat-status-badge");
       if (state.beatModelId) {
@@ -1037,6 +1086,7 @@
 
     document.getElementById("btn-clear-beat").onclick = () => {
       state.beatModelId = null;
+      state.currentPage = 1;
       document.getElementById("beat-model-select").value = "";
       document.getElementById("beat-status-badge").style.display = "none";
       renderTable();
@@ -1058,10 +1108,12 @@
         inp.oninput = (e) => {
           const key = thresholdMapping[id];
           state.benchmarkThresholds[key] = e.target.value ? parseFloat(e.target.value) : null;
+          state.currentPage = 1;
           renderTable();
         };
       }
     });
+
 
     // 10. Scorer Presets
     document.getElementById("preset-balanced").onclick = () => {
@@ -1125,6 +1177,7 @@
         state.sortKey = sortKey;
         state.sortAsc = false;
       }
+      state.currentPage = 1;
       renderTable();
     };
 
@@ -1263,6 +1316,40 @@
         showScorecard(dot.dataset.model);
       }
     });
+
+    // 18. Table Pagination Controls
+    const btnFirst = document.getElementById("btn-first-page");
+    const btnPrev = document.getElementById("btn-prev-page");
+    const btnNext = document.getElementById("btn-next-page");
+    const btnLast = document.getElementById("btn-last-page");
+    const selPageSize = document.getElementById("select-page-size");
+
+    if (btnFirst) btnFirst.onclick = () => {
+      state.currentPage = 1;
+      renderTable();
+    };
+    if (btnPrev) btnPrev.onclick = () => {
+      if (state.currentPage > 1) {
+        state.currentPage--;
+        renderTable();
+      }
+    };
+    if (btnNext) btnNext.onclick = () => {
+      state.currentPage++;
+      renderTable();
+    };
+    if (btnLast) btnLast.onclick = () => {
+      const all = getSortedModels();
+      const ps = state.pageSize === "all" ? all.length : parseInt(state.pageSize, 10);
+      state.currentPage = Math.max(1, Math.ceil(all.length / (ps || 1)));
+      renderTable();
+    };
+    if (selPageSize) selPageSize.onchange = (e) => {
+      state.pageSize = e.target.value;
+      state.currentPage = 1;
+      renderTable();
+    };
+
   }
 
   // Launch on DOM ready

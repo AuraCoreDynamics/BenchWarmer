@@ -16,7 +16,7 @@
         <div class="brand-title">
           BenchWarmer
           <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
-          <span class="badge badge-green" id="badge-model-count">80 Models</span>
+          <span class="badge badge-green" id="badge-model-count">1,427 Models</span>
         </div>
         <div class="brand-subtitle" id="header-built-date">Current as of November 2026</div>
       </div>
@@ -190,6 +190,27 @@
           <!-- Model rows rendered by app.js -->
         </tbody>
       </table>
+    </div>
+
+    <!-- Table Pagination Bar -->
+    <div class="pagination-bar" id="pagination-bar">
+      <div class="pagination-info" id="pagination-info">Showing 1–50 of 1,427 models</div>
+      <div class="pagination-controls">
+        <button class="btn btn-secondary btn-sm" id="btn-first-page" title="First Page">&laquo;</button>
+        <button class="btn btn-secondary btn-sm" id="btn-prev-page" title="Previous Page">&lsaquo; Prev</button>
+        <span class="page-indicator" id="page-indicator">Page 1 of 29</span>
+        <button class="btn btn-secondary btn-sm" id="btn-next-page" title="Next Page">Next &rsaquo;</button>
+        <button class="btn btn-secondary btn-sm" id="btn-last-page" title="Last Page">&raquo;</button>
+        <div class="page-size-selector">
+          <span>Show:</span>
+          <select id="select-page-size" class="select-page-size">
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="250">250</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
     </div>
 
   </main>

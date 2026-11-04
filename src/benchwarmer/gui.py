@@ -42,7 +42,7 @@ class BenchWarmerGUIController:
         ascending: bool = False,
     ) -> List[Dict[str, Any]]:
         """Retrieve leaderboard rows with dual raw/display values for accurate sorting."""
-        fetch_limit = limit if limit is not None else 1000
+        fetch_limit = limit if limit is not None else 5000
         if vram_budget is not None:
             summaries = self.bw.rank(
                 benchmark=sort_key,

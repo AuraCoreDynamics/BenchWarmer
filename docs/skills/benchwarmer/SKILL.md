@@ -61,6 +61,14 @@ When operating inside an MCP-enabled environment, call:
 - `get_pareto_frontier(metric, max_vram_gb, quant)`
 - `audit_model_contamination(model_id)`
 
+### 4. Zero-Privilege Deployment via AuraSeed
+
+BenchWarmer packages and deploys into sovereign virtual environments using [AuraSeed](https://github.com/AuraCoreDynamics/auraseed):
+- Package: `python -m auraseed package-app <path/to/benchwarmer> --out <dest_dist>`
+- Install: `python -m auraseed install-app <path/to/benchwarmer_dist> -s --force`
+- Launch: `%USERPROFILE%\.auraseed\apps\benchwarmer\run-benchwarmer.bat` or `benchwarmer gui`
+- See [docs/AURASEED_DEPLOYMENT.md](../../AURASEED_DEPLOYMENT.md) for full deployment guide.
+
 ---
 
 ## Best Practices

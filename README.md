@@ -63,6 +63,23 @@ for point in pareto:
     print(f"{point.model_id} ({point.estimated_vram_gb:.1f} GB): score {point.score:.2f}")
 ```
 
+### Quick Deployment via AuraSeed
+
+For zero-privilege, single-command deployment without modifying global system Python or requiring administrative privileges, deploy BenchWarmer using [AuraSeed](https://github.com/AuraCoreDynamics/auraseed):
+
+```powershell
+# 1. Package BenchWarmer into a portable distribution bundle:
+python -m auraseed package-app C:\dev\benchwarmer --out C:\dev\benchwarmer_dist
+
+# 2. Deploy locally to sovereign application directory (~/.auraseed/apps/benchwarmer):
+python -m auraseed install-app C:\dev\benchwarmer_dist -s --force
+
+# 3. Launch from desktop shortcut or native runner:
+%USERPROFILE%\.auraseed\apps\benchwarmer\run-benchwarmer.bat
+```
+
+See the complete [AuraSeed Deployment Guide](docs/AURASEED_DEPLOYMENT.md) for air-gapped installation modes, lifecycle hooks, and launcher configurations.
+
 ---
 
 ## AuraRouter Native Integration

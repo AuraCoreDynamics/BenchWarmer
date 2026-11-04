@@ -1,0 +1,14 @@
+{
+  "name": "benchwarmer",
+  "display_name": "BenchWarmer - Offline LLM Benchmark Oracle",
+  "version": "0.1.0",
+  "description": "Offline Zero-Dependency LLM Benchmark Oracle & Pareto Routing GUI",
+  "entrypoint_command": "benchwarmer gui",
+  "default_dest": "~/.auraseed/apps/benchwarmer",
+  "source_path": ".",
+  "hooks": {
+    "post_install": "hooks/post_install.py"
+  },
+  "create_desktop_shortcut": true,
+  "create_launchers": true
+}

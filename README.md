@@ -55,6 +55,17 @@ for point in pareto:
 
 ---
 
+## AuraRouter Native Integration
+
+BenchWarmer serves as the offline, zero-network benchmark oracle for [AuraRouter](https://github.com/AuraCoreDynamics/aurarouter):
+
+- **Data-Driven Cold-Start Priors**: Translates empirical benchmark metrics into Beta prior distributions across complexity bands (Band 0: IFEval/Arena Elo; Band 1: balanced composite; Band 2: math_hard/gpqa) for contextual Thompson sampling.
+- **Stage 1 Hardware VRAM Gating**: Gating local candidate models against available GPU memory using check_hardware_fit(model_id, max_vram_gb, quant) to prune oversized models before dispatch.
+- **Stage 2 Contamination Audit Defense**: Dampens synthetic benchmark overfitting and reasoning cliff traps by penalizing models flagged with HIGH_CONTAMINATION_RISK by 0.60x via ContaminationAuditFactor.
+- **Automatic Catalog Enrichment**: Automatically enriches discovered model configurations with parameter counts (params_b), benchmark metrics, and quantization VRAM envelopes.
+
+---
+
 ## Command Line Interface (CLI)
 
 ```bash

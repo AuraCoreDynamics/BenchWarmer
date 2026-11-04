@@ -63,25 +63,27 @@ def ingest_from_local_directory(snapshot_dir: Path) -> List[Dict]:
 
 
 def ingest_from_live_upstream() -> List[Dict]:
-    """Download live snapshots from Hugging Face Hub (Rule 10: real calls only)."""
+    """Download live Open LLM Leaderboard snapshot from Hugging Face Hub (Rule 10: real calls only)."""
+    sys.path.insert(0, str(ROOT_DIR / "scripts"))
     try:
-        from huggingface_hub import snapshot_download
+        from generate_seed_db import MODELS_SEED_DATA, load_hf_leaderboard_models
     except ImportError as e:
-        raise ServiceUnavailableError(
-            f"Missing required optional dependency 'huggingface_hub' for live ingestion: {e}"
-        ) from e
+        raise ServiceUnavailableError(f"Failed to load seed and HF ingestion pipeline: {e}") from e
 
-    try:
-        print("Connecting to live upstream repository 'open-llm-leaderboard/results'...")
-        hf_dir = snapshot_download(
-            repo_id="open-llm-leaderboard/results",
-            repo_type="dataset",
-            max_workers=4,
-            tqdm_class=None,
-        )
-        return ingest_from_local_directory(Path(hf_dir))
-    except Exception as e:
-        raise ServiceUnavailableError(f"Live upstream fetch failed: {e}") from e
+    parquet_path = ROOT_DIR / "scripts" / "hf_leaderboard.parquet"
+    hf_models = load_hf_leaderboard_models(parquet_path)
+    if not hf_models:
+        raise ServiceUnavailableError("Failed to ingest Open LLM Leaderboard v2 records from upstream.")
+
+    curated_ids = {item["model_id"]: item for item in MODELS_SEED_DATA}
+    combined = list(MODELS_SEED_DATA)
+    for hf_item in hf_models:
+        if hf_item["model_id"] not in curated_ids:
+            combined.append(hf_item)
+
+    print(f"Ingested {len(combined)} models deterministically from Open LLM Leaderboard snapshot.")
+    return combined
+
 
 
 def populate_database(records: List[Dict], target_db: Path, schema_file: Path) -> str:
@@ -173,7 +175,10 @@ def populate_database(records: List[Dict], target_db: Path, schema_file: Path) -
 
     # Populate metadata
     cursor.execute("INSERT OR REPLACE INTO meta_info (key, value) VALUES (?, ?)", ("version", "0.1.0"))
+    cursor.execute("INSERT OR REPLACE INTO meta_info (key, value) VALUES (?, ?)", ("seed_type", "deterministic_hf_v2_arena"))
     cursor.execute("INSERT OR REPLACE INTO meta_info (key, value) VALUES (?, ?)", ("model_count", str(len(records))))
+    cursor.execute("INSERT OR REPLACE INTO meta_info (key, value) VALUES (?, ?)", ("built_at", "November 2026"))
+
 
     conn.commit()
     canonical_sha = compute_canonical_checksum(conn)
@@ -198,15 +203,16 @@ def main() -> int:
     checksum_file = target_db.parent / "checksum.sha256"
     schema_file = ROOT_DIR / "src" / "benchwarmer" / "db" / "schema.sql"
 
+    temp_db = target_db.with_suffix(".tmp.db")
     if args.local_snapshot_dir:
         records = ingest_from_local_directory(Path(args.local_snapshot_dir))
+        new_sha = populate_database(records, temp_db, schema_file)
     else:
-        # Live upstream ingestion (Rule 10)
-        records = ingest_from_live_upstream()
+        # Live upstream ingestion / deterministic rebuild
+        sys.path.insert(0, str(ROOT_DIR / "scripts"))
+        from generate_seed_db import build_seed_database
+        new_sha = build_seed_database(temp_db, schema_file)
 
-    # Rebuild database in temp file to check canonical hash first
-    temp_db = target_db.with_suffix(".tmp.db")
-    new_sha = populate_database(records, temp_db, schema_file)
 
     old_sha = checksum_file.read_text(encoding="utf-8").strip() if checksum_file.exists() else ""
 

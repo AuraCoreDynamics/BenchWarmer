@@ -168,6 +168,8 @@ class TestBenchWarmerCLI(unittest.TestCase):
 
     def test_09_zipapp_standalone_subprocess(self):
         pyz_path = ROOT_DIR / "dist" / "benchwarmer.pyz"
+        if not pyz_path.exists():
+            subprocess.run([sys.executable, str(ROOT_DIR / "scripts" / "make_zipapp.py")], check=True)
         self.assertTrue(pyz_path.exists(), "dist/benchwarmer.pyz must exist")
 
         cmd = [

@@ -15,6 +15,7 @@ import json
 import math
 from pathlib import Path
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -277,9 +278,18 @@ class TestAdversarialRedTeam(unittest.TestCase):
     def test_09_zero_external_runtime_dependencies(self):
         """Ensure no external third-party modules are loaded into sys.modules during execution."""
         forbidden_prefixes = ["requests", "urllib3", "pydantic", "fastapi", "click", "pandas", "numpy"]
-        for mod in sys.modules:
-            for prefix in forbidden_prefixes:
-                self.assertFalse(mod.startswith(prefix), f"Forbidden runtime dependency detected: {mod}")
+        cmd = [
+            sys.executable,
+            "-c",
+            "import sys; sys.path.insert(0, r'" + str(ROOT_DIR / "src") + "'); "
+            "from benchwarmer import BenchWarmer; bw = BenchWarmer(); "
+            "bw.score_candidates(['microsoft/Phi-4'], {'ifeval': 1.0}); "
+            f"forbidden = {forbidden_prefixes!r}; "
+            "leaks = [m for m in sys.modules if any(m.startswith(f) for f in forbidden)]; "
+            "assert not leaks, f'Forbidden runtime dependencies detected: {leaks}'",
+        ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, f"Dependency isolation error: {res.stderr}")
 
     def test_10_canonical_sha256_reproducibility(self):
         """Canonical SHA-256 computed over row stream matches stored checksum."""

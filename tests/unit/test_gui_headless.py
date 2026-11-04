@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 import sys
 import unittest
+import unittest.mock
 
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR / "src"))
@@ -125,7 +126,8 @@ class TestGUIHeadless(unittest.TestCase):
         old_stderr = sys.stderr
         sys.stderr = stderr_buf
         try:
-            bw_gui.launch_gui()
+            with unittest.mock.patch.dict("sys.modules", {"tkinter": None}):
+                bw_gui.launch_gui()
         finally:
             sys.stderr = old_stderr
         # Should catch exception cleanly and output actionable message

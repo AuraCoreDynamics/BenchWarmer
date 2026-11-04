@@ -1,6 +1,6 @@
 /**
  * BenchWarmer Web Application Controller
- * Offline Zero-Dependency Interactive LLM Benchmark Oracle
+ * Interactive LLM Benchmark Leaderboards, Pareto Routing, and Workload Evaluation
  */
 
 (function () {
@@ -12,6 +12,16 @@
     q6_k: 6.6, q5_k_m: 5.7, q4_k_m: 4.8, q4_0: 4.5,
     q3_k_m: 3.9, q2_k: 2.9
   };
+
+  const BENCH_METRICS = [
+    { key: "ifeval", code: "IFEval", label: "Instruction Following (IFEval)" },
+    { key: "bbh", code: "BBH", label: "Multi-Step Reasoning (BBH)" },
+    { key: "math_hard", code: "MATH Hard", label: "Advanced Mathematics (MATH Hard)" },
+    { key: "gpqa", code: "GPQA", label: "Graduate Scientific Reasoning (GPQA Diamond)" },
+    { key: "musr", code: "MuSR", label: "Multistep Soft Reasoning (MuSR)" },
+    { key: "mmlu_pro", code: "MMLU-Pro", label: "Broad Professional Knowledge (MMLU-Pro)" },
+    { key: "arena_elo", code: "Arena Elo", label: "Human Preference Elo (Arena Elo)" }
+  ];
 
   const RADAR_AXES = [
     { key: "ifeval", label: "IFEval" },
@@ -26,6 +36,16 @@
     "#58a6ff", "#3fb950", "#d29922", "#bc8cff",
     "#f85149", "#f778ba", "#79c0ff", "#56d364"
   ];
+
+  const DEFAULT_WEIGHTS = {
+    ifeval: 1.0,
+    bbh: 1.0,
+    math_hard: 1.2,
+    gpqa: 1.2,
+    musr: 0.8,
+    mmlu_pro: 1.0,
+    arena_elo: 1.0
+  };
 
   function getHardwareTier(vramGb) {
     if (vramGb <= 0) return { label: "Cloud / API", color: "badge-cyan" };
@@ -51,6 +71,27 @@
     vramBudget: null,
     minParams: null,
     maxParams: null,
+    customWeights: { ...DEFAULT_WEIGHTS },
+    beatModelId: null,
+    beatCriteria: {
+      all: true,
+      math_hard: false,
+      ifeval: false,
+      gpqa: false,
+      bbh: false,
+      mmlu_pro: false,
+      arena_elo: false,
+      vram: false
+    },
+    benchmarkThresholds: {
+      ifeval: null,
+      math_hard: null,
+      gpqa: null,
+      bbh: null,
+      mmlu_pro: null,
+      musr: null,
+      arena_elo: null
+    },
     contextTargetId: null
   };
 
@@ -109,8 +150,47 @@
       { key: "precision", label: "Precision", sortable: true },
       { key: "is_moe", label: "MoE", sortable: true },
       { key: "license", label: "License", sortable: true }
+    ],
+    scorer: [
+      { key: "select", label: "", sortable: false },
+      { key: "rank", label: "Rank", sortable: false },
+      { key: "model_id", label: "Model", sortable: true },
+      { key: "custom_score", label: "Weighted Score", sortable: true },
+      { key: "params_b", label: "Params", sortable: true },
+      { key: "vram", label: "VRAM", sortable: true },
+      { key: "math_hard", label: "MATH", sortable: true },
+      { key: "ifeval", label: "IFEval", sortable: true },
+      { key: "gpqa", label: "GPQA", sortable: true },
+      { key: "bbh", label: "BBH", sortable: true },
+      { key: "arena_elo_raw", label: "Arena Elo", sortable: true }
     ]
   };
+
+  // --- Compute Custom Weighted Score for a Model ---
+  function computeCustomScore(model) {
+    const weights = state.customWeights;
+    let weightedSum = 0;
+    let totalWeight = 0;
+
+    Object.keys(weights).forEach(k => {
+      const w = weights[k];
+      if (w <= 0) return;
+
+      let score = null;
+      if (k === "arena_elo") {
+        score = model.scores ? model.scores.arena_elo : null;
+      } else if (model.scores && model.scores[k] !== undefined && model.scores[k] !== null) {
+        score = model.scores[k];
+      }
+
+      if (score !== null && score !== undefined) {
+        weightedSum += w * score;
+        totalWeight += w;
+      }
+    });
+
+    return totalWeight > 0 ? (weightedSum / totalWeight) : 0;
+  }
 
   // --- Initial Data Fetch ---
   async function init() {
@@ -122,34 +202,44 @@
       state.metadata = metaRes;
       state.models = modelsRes;
 
-      if (metaRes.model_count) {
-        document.getElementById("badge-model-count").textContent = `${metaRes.model_count} Models`;
-      }
-      if (metaRes.canonical_sha256) {
-        document.getElementById("header-sha").textContent = `SHA-256: ${metaRes.canonical_sha256.substring(0, 16)}... | Offline Deterministic Oracle`;
-      }
+      const modelCount = modelsRes.length;
+      document.getElementById("badge-model-count").textContent = `${modelCount} Models`;
 
+      const builtAt = metaRes.built_at || "November 2026";
+      document.getElementById("header-built-date").textContent = `Current as of ${builtAt}`;
+
+      populateBeatModelSelect();
       setupEventListeners();
+      renderScorerSliders();
       renderTable();
     } catch (err) {
       console.error("Failed to initialize BenchWarmer:", err);
     }
   }
 
+  function populateBeatModelSelect() {
+    const sel = document.getElementById("beat-model-select");
+    const sorted = [...state.models].sort((a, b) => a.model_id.localeCompare(b.model_id));
+    sel.innerHTML = `<option value="">-- Choose baseline model --</option>` +
+      sorted.map(m => `<option value="${m.model_id}">${m.model_name} (${m.org}${m.params_b ? `, ${m.params_b.toFixed(1)}B` : ''})</option>`).join("");
+  }
+
   // --- Filtering & Sorting ---
   function getFilteredModels() {
+    const beatRef = state.beatModelId ? state.models.find(m => m.model_id === state.beatModelId) : null;
+
     return state.models.filter(m => {
-      // Parameter range filter
+      // 1. Parameter range filter
       if (state.minParams !== null && (m.params_b === null || m.params_b < state.minParams)) return false;
       if (state.maxParams !== null && (m.params_b === null || m.params_b > state.maxParams)) return false;
 
-      // VRAM budget filter
+      // 2. VRAM budget filter
       if (state.vramBudget !== null && state.vramBudget < 320) {
         const vram = m.estimated_vram_gb ? m.estimated_vram_gb[state.currentQuant] : 0;
         if (vram > state.vramBudget) return false;
       }
 
-      // Search query filter
+      // 3. Search query filter
       if (state.searchQuery) {
         const q = state.searchQuery.toLowerCase();
         const matchesId = m.model_id.toLowerCase().includes(q);
@@ -157,6 +247,58 @@
         const matchesName = m.model_name.toLowerCase().includes(q);
         const matchesArch = m.architecture && m.architecture.toLowerCase().includes(q);
         if (!matchesId && !matchesOrg && !matchesName && !matchesArch) return false;
+      }
+
+      // 4. Benchmark minimum score thresholds
+      const thresh = state.benchmarkThresholds;
+      if (thresh.ifeval !== null && (!m.scores || m.scores.ifeval < thresh.ifeval)) return false;
+      if (thresh.math_hard !== null && (!m.scores || m.scores.math_hard < thresh.math_hard)) return false;
+      if (thresh.gpqa !== null && (!m.scores || m.scores.gpqa < thresh.gpqa)) return false;
+      if (thresh.bbh !== null && (!m.scores || m.scores.bbh < thresh.bbh)) return false;
+      if (thresh.mmlu_pro !== null && (!m.scores || m.scores.mmlu_pro < thresh.mmlu_pro)) return false;
+      if (thresh.musr !== null && (!m.scores || m.scores.musr < thresh.musr)) return false;
+      if (thresh.arena_elo !== null) {
+        const rawElo = m.raw_scores ? m.raw_scores.arena_elo : 0;
+        if (rawElo < thresh.arena_elo) return false;
+      }
+
+      // 5. "Match or Beat Reference Model" Filter
+      if (beatRef) {
+        const crit = state.beatCriteria;
+        if (crit.all) {
+          // Model must equal or beat in HF v2 Avg (or overall composite)
+          if ((m.hf_v2_avg || 0) < (beatRef.hf_v2_avg || 0)) return false;
+        }
+        if (crit.math_hard) {
+          const refScore = (beatRef.scores && beatRef.scores.math_hard) || 0;
+          if (!m.scores || (m.scores.math_hard || 0) < refScore) return false;
+        }
+        if (crit.ifeval) {
+          const refScore = (beatRef.scores && beatRef.scores.ifeval) || 0;
+          if (!m.scores || (m.scores.ifeval || 0) < refScore) return false;
+        }
+        if (crit.gpqa) {
+          const refScore = (beatRef.scores && beatRef.scores.gpqa) || 0;
+          if (!m.scores || (m.scores.gpqa || 0) < refScore) return false;
+        }
+        if (crit.bbh) {
+          const refScore = (beatRef.scores && beatRef.scores.bbh) || 0;
+          if (!m.scores || (m.scores.bbh || 0) < refScore) return false;
+        }
+        if (crit.mmlu_pro) {
+          const refScore = (beatRef.scores && beatRef.scores.mmlu_pro) || 0;
+          if (!m.scores || (m.scores.mmlu_pro || 0) < refScore) return false;
+        }
+        if (crit.arena_elo) {
+          const refElo = (beatRef.raw_scores && beatRef.raw_scores.arena_elo) || 0;
+          const myElo = (m.raw_scores && m.raw_scores.arena_elo) || 0;
+          if (myElo < refElo) return false;
+        }
+        if (crit.vram) {
+          const refVram = beatRef.estimated_vram_gb ? beatRef.estimated_vram_gb[state.currentQuant] : Infinity;
+          const myVram = m.estimated_vram_gb ? m.estimated_vram_gb[state.currentQuant] : 0;
+          if (myVram > refVram) return false;
+        }
       }
 
       return true;
@@ -172,7 +314,10 @@
       let va = null;
       let vb = null;
 
-      if (key === "model_id") {
+      if (key === "custom_score") {
+        va = computeCustomScore(a);
+        vb = computeCustomScore(b);
+      } else if (key === "model_id") {
         va = a.model_id;
         vb = b.model_id;
         return asc ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -212,17 +357,60 @@
     return list;
   }
 
+  // --- Rendering Custom Scorer Sliders ---
+  function renderScorerSliders() {
+    const grid = document.getElementById("scorer-sliders-grid");
+    if (!grid) return;
+
+    grid.innerHTML = BENCH_METRICS.map(m => {
+      const val = state.customWeights[m.key] !== undefined ? state.customWeights[m.key] : 1.0;
+      return `
+        <div class="weight-card">
+          <div class="weight-header">
+            <span class="weight-label">${m.label}</span>
+            <span class="weight-val" id="disp-wt-${m.key}">${val.toFixed(1)}</span>
+          </div>
+          <input type="range" class="range-input weight-slider" data-bench="${m.key}" min="0" max="3" step="0.1" value="${val}" style="width: 100%;">
+        </div>
+      `;
+    }).join("");
+
+    grid.querySelectorAll(".weight-slider").forEach(sl => {
+      sl.oninput = (e) => {
+        const b = e.target.dataset.bench;
+        const v = parseFloat(e.target.value);
+        state.customWeights[b] = v;
+        const disp = document.getElementById(`disp-wt-${b}`);
+        if (disp) disp.textContent = v.toFixed(1);
+        if (state.activeView === "scorer") renderTable();
+      };
+    });
+  }
+
   // --- Rendering Table ---
   function renderTable() {
     const thead = document.getElementById("table-head");
     const tbody = document.getElementById("table-body");
     const cols = VIEW_PRESETS[state.activeView];
 
+    // Toggle Scorer Panel visibility
+    const scorerPanel = document.getElementById("scorer-panel");
+    if (scorerPanel) {
+      if (state.activeView === "scorer") {
+        scorerPanel.classList.add("open");
+      } else {
+        scorerPanel.classList.remove("open");
+      }
+    }
+
     // Render Headers
     let headHtml = "<tr>";
     cols.forEach(col => {
       if (col.key === "select") {
-        headHtml += `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-cb"></th>`;
+        const isAllSelected = state.models.length > 0 && state.selectedModelIds.size === state.models.length;
+        headHtml += `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-cb" ${isAllSelected ? "checked" : ""}></th>`;
+      } else if (col.key === "rank") {
+        headHtml += `<th style="width: 60px;">${col.label}</th>`;
       } else {
         const isSorted = state.sortKey === col.key;
         const sortClass = isSorted ? (state.sortAsc ? "sorted-asc" : "sorted-desc") : "";
@@ -237,23 +425,29 @@
     document.getElementById("match-count").textContent = `${models.length} of ${state.models.length} models displayed`;
 
     if (models.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align: center; padding: 32px; color: var(--text-secondary);">No models matched your filter criteria.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${cols.length}" style="text-align: center; padding: 32px; color: var(--text-secondary);">No models matched your filter criteria. Try clicking "Reset Filters".</td></tr>`;
       return;
     }
 
     let rowsHtml = "";
-    models.forEach(m => {
+    models.forEach((m, idx) => {
       const isSelected = state.selectedModelIds.has(m.model_id);
       rowsHtml += `<tr data-model-id="${m.model_id}" class="${isSelected ? "selected" : ""}">`;
 
       cols.forEach(col => {
         if (col.key === "select") {
-          rowsHtml += `<td style="text-align: center;" onclick="event.stopPropagation();"><input type="checkbox" class="row-select-cb" data-id="${m.model_id}" ${isSelected ? "checked" : ""}></td>`;
+          rowsHtml += `<td style="text-align: center;"><input type="checkbox" class="row-select-cb" data-id="${m.model_id}" ${isSelected ? "checked" : ""}></td>`;
+        } else if (col.key === "rank") {
+          rowsHtml += `<td><span class="badge ${idx < 3 ? 'badge-amber' : ''}">#${idx + 1}</span></td>`;
         } else if (col.key === "model_id") {
           const orgBadge = `<span class="org-tag">${m.org}</span>`;
           rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span>${m.model_name}</span></div></td>`;
         } else if (col.key === "org") {
           rowsHtml += `<td><span class="badge">${m.org}</span></td>`;
+        } else if (col.key === "custom_score") {
+          const cs = computeCustomScore(m);
+          const barW = Math.min(60, Math.round(cs * 0.6));
+          rowsHtml += `<td><span class="score-num" style="color: var(--accent-cyan); font-weight: 700;">${cs.toFixed(2)}</span><div class="score-bar-mini" style="width: ${barW}px; background: var(--accent-cyan);"></div></td>`;
         } else if (col.key === "params_b") {
           const pDisp = m.params_b !== null ? `${m.params_b.toFixed(1)}B` : "Proprietary";
           rowsHtml += `<td><span class="badge badge-cyan">${pDisp}</span></td>`;
@@ -306,8 +500,6 @@
 
   // --- SVG Charts Generation ---
   function generateRadarSvg(dimensions, seriesList) {
-    // dimensions: [{ key, label }]
-    // seriesList: [{ name, color, values: { [key]: score } }]
     const size = 340;
     const center = size / 2;
     const radius = 110;
@@ -315,28 +507,24 @@
 
     let svg = `<svg viewBox="0 0 ${size} ${size}" class="svg-chart">`;
 
-    // Draw concentric reference circles (20, 40, 60, 80, 100)
     for (let r = 20; r <= 100; r += 20) {
       const cr = (r / 100) * radius;
       svg += `<circle cx="${center}" cy="${center}" r="${cr}" fill="none" stroke="#252b36" stroke-dasharray="2,2" stroke-width="1"/>`;
       svg += `<text x="${center + 4}" y="${center - cr + 4}" fill="#484f58" font-size="9" font-family="monospace">${r}</text>`;
     }
 
-    // Draw radial axis spokes & labels
     dimensions.forEach((dim, i) => {
       const angle = i * angleStep - Math.PI / 2;
       const x2 = center + Math.cos(angle) * radius;
       const y2 = center + Math.sin(angle) * radius;
       svg += `<line x1="${center}" y1="${center}" x2="${x2}" y2="${y2}" stroke="#30363d" stroke-width="1"/>`;
 
-      // Label positioning
       const lx = center + Math.cos(angle) * (radius + 24);
       const ly = center + Math.sin(angle) * (radius + 24);
       const anchor = Math.abs(Math.cos(angle)) < 0.2 ? "middle" : (Math.cos(angle) > 0 ? "start" : "end");
       svg += `<text x="${lx}" y="${ly + 4}" fill="#8b949e" font-size="11" font-weight="600" text-anchor="${anchor}">${dim.label}</text>`;
     });
 
-    // Draw polygon series
     seriesList.forEach((s) => {
       const pts = dimensions.map((dim, i) => {
         const val = s.values[dim.key] || 0;
@@ -347,10 +535,8 @@
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       }).join(" ");
 
-      // Semi-transparent area
       svg += `<polygon points="${pts}" fill="${s.color}" fill-opacity="0.25" stroke="${s.color}" stroke-width="2"/>`;
 
-      // Vertices
       dimensions.forEach((dim, i) => {
         const val = s.values[dim.key] || 0;
         const normR = (Math.min(100, Math.max(0, val)) / 100) * radius;
@@ -367,11 +553,13 @@
 
   // --- Modals Controller ---
   function openModal(modalId) {
-    document.getElementById(modalId).classList.add("open");
+    const m = document.getElementById(modalId);
+    if (m) m.classList.add("open");
   }
 
   function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove("open");
+    const m = document.getElementById(modalId);
+    if (m) m.classList.remove("open");
   }
 
   // Scorecard Modal
@@ -470,7 +658,14 @@
         state.selectedModelIds.add(model.model_id);
       }
       cmpBtn.textContent = state.selectedModelIds.has(model.model_id) ? "Remove from Comparison" : "Add to Comparison";
-      renderTable();
+      updateCompareButton();
+      // Update checkbox in table if present
+      const cb = document.querySelector(`.row-select-cb[data-id="${model.model_id}"]`);
+      if (cb) {
+        cb.checked = state.selectedModelIds.has(model.model_id);
+        const tr = cb.closest("tr");
+        if (tr) tr.classList.toggle("selected", cb.checked);
+      }
     };
 
     openModal("modal-scorecard");
@@ -490,19 +685,16 @@
 
       document.getElementById("cmp-model-count").textContent = `${res.models.length} Models`;
 
-      // Build radar series
       const series = res.models.map((m, idx) => ({
         name: m.model_name,
         color: PALETTE[idx % PALETTE.length],
         values: m.scores || {}
       }));
 
-      // Render Multi-Radar
       const radarContainer = document.getElementById("cmp-radar-svg").parentNode;
       const radarSvg = generateRadarSvg(RADAR_AXES, series);
       radarContainer.querySelector("svg").outerHTML = radarSvg;
 
-      // Render Radar Legend
       const legendContainer = document.getElementById("cmp-radar-legend");
       legendContainer.innerHTML = series.map(s => `
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -511,7 +703,6 @@
         </div>
       `).join("");
 
-      // Render Per-Benchmark Bars
       const barsContainer = document.getElementById("cmp-bars-container");
       let barsHtml = "";
       res.benchmarks.forEach(bench => {
@@ -523,7 +714,7 @@
           const isWinner = res.best_in_class[bench] && res.best_in_class[bench].model_id === m.model_id;
           barsHtml += `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px; font-size: 11px;">
-              <span style="width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.model_name}</span>
+              <span style="width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${m.model_name}</span>
               <div style="flex: 1; height: 12px; background: #21262d; border-radius: 2px; overflow: hidden;">
                 <div style="width: ${Math.min(100, Math.max(0, s))}%; height: 100%; background: ${color}; border-radius: 2px;"></div>
               </div>
@@ -536,7 +727,6 @@
       });
       barsContainer.innerHTML = barsHtml;
 
-      // Render Head-to-Head Specs Table
       const thead = document.getElementById("cmp-specs-head");
       const tbody = document.getElementById("cmp-specs-body");
       thead.innerHTML = `
@@ -563,7 +753,6 @@
         </tr>
       `).join("");
 
-      // Copy Markdown Button
       document.getElementById("cmp-btn-copy-md").onclick = () => {
         let md = `# BenchWarmer Model Comparison\n\n`;
         md += `| Attribute | ` + res.models.map(m => m.model_name).join(" | ") + ` |\n`;
@@ -598,7 +787,6 @@
       const frontierPts = await fetch(`/api/pareto?metric=${metric}&quant=${quant}`).then(r => r.json());
       const frontierSet = new Set(frontierPts.map(p => p.model_id));
 
-      // Eligible models for scatter plot
       const scatterData = state.models
         .filter(m => m.params_b !== null && m.estimated_vram_gb)
         .map(m => {
@@ -617,7 +805,6 @@
           };
         });
 
-      // Scatter Plot bounds
       const maxVram = Math.max(...scatterData.map(d => d.vram), 10);
       const minScore = Math.min(...scatterData.map(d => d.score), 0);
       const maxScore = Math.max(...scatterData.map(d => d.score), 100);
@@ -637,7 +824,6 @@
       }
 
       let svg = "";
-      // Grid lines
       for (let s = Math.ceil(minScore / 20) * 20; s <= maxScore; s += 20) {
         const y = scaleY(s);
         svg += `<line x1="${padL}" y1="${y}" x2="${svgW - padR}" y2="${y}" stroke="#21262d" stroke-width="1"/>`;
@@ -649,7 +835,6 @@
         svg += `<text x="${x}" y="${svgH - padB + 16}" fill="#6e7681" font-size="10" text-anchor="middle" font-family="monospace">${v}G</text>`;
       }
 
-      // Frontier curve path
       frontierPts.sort((a, b) => a.estimated_vram_gb - b.estimated_vram_gb);
       if (frontierPts.length > 1) {
         const pathD = frontierPts.map((p, idx) => {
@@ -660,7 +845,6 @@
         svg += `<path d="${pathD}" fill="none" stroke="#58a6ff" stroke-width="2.5" stroke-dasharray="4,2"/>`;
       }
 
-      // Scatter Points
       scatterData.forEach(d => {
         const x = scaleX(d.vram);
         const y = scaleY(d.score);
@@ -677,7 +861,6 @@
 
       document.getElementById("pareto-svg").innerHTML = svg;
 
-      // Frontier Table
       const ptBody = document.getElementById("pareto-table-body");
       ptBody.innerHTML = frontierPts.map(p => `
         <tr data-model-id="${p.model_id}" style="cursor: pointer;">
@@ -724,122 +907,56 @@
     }
   }
 
-  // Custom Scorer Modal
-  function showScorerModal() {
-    const grid = document.getElementById("scorer-weights-grid");
-    const weights = {
-      ifeval: 1.0,
-      bbh: 1.0,
-      math_hard: 1.5,
-      gpqa: 1.5,
-      musr: 0.8,
-      mmlu_pro: 1.0,
-      arena_elo: 1.2
-    };
-
-    grid.innerHTML = Object.keys(weights).map(k => `
-      <div style="background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px;">
-        <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-          <span style="text-transform: uppercase; font-weight: 600;">${k}</span>
-          <span id="wt-disp-${k}" style="font-family: monospace;">${weights[k].toFixed(1)}</span>
-        </div>
-        <input type="range" class="scorer-slider" data-bench="${k}" min="0" max="3" step="0.1" value="${weights[k]}" style="width: 100%; accent-color: var(--accent-cyan);">
-      </div>
-    `).join("");
-
-    function recomputeScores() {
-      const activeWeights = {};
-      let totalW = 0;
-      grid.querySelectorAll(".scorer-slider").forEach(sl => {
-        const b = sl.dataset.bench;
-        const val = parseFloat(sl.value);
-        activeWeights[b] = val;
-        totalW += val;
-        document.getElementById(`wt-disp-${b}`).textContent = val.toFixed(1);
-      });
-
-      if (totalW === 0) return;
-
-      const scored = state.models.map(m => {
-        let weightedSum = 0;
-        let matchedW = 0;
-        Object.keys(activeWeights).forEach(b => {
-          const w = activeWeights[b];
-          if (w > 0 && m.scores && m.scores[b] !== undefined && m.scores[b] !== null) {
-            weightedSum += w * m.scores[b];
-            matchedW += w;
-          }
-        });
-        const comp = matchedW > 0 ? (weightedSum / matchedW) : 0;
-        return {
-          model_id: m.model_id,
-          model_name: m.model_name,
-          params_b: m.params_b,
-          score: comp
-        };
-      });
-
-      scored.sort((a, b) => b.score - a.score);
-
-      const tbody = document.getElementById("scorer-results-body");
-      tbody.innerHTML = scored.slice(0, 15).map((s, idx) => `
-        <tr data-model-id="${s.model_id}" style="cursor: pointer;">
-          <td>#${idx + 1}</td>
-          <td><strong>${s.model_name}</strong></td>
-          <td><span class="score-num" style="color: var(--accent-cyan);">${s.score.toFixed(2)}</span></td>
-          <td>${s.params_b ? `${s.params_b.toFixed(1)}B` : "Proprietary"}</td>
-        </tr>
-      `).join("");
-    }
-
-    grid.querySelectorAll(".scorer-slider").forEach(sl => {
-      sl.oninput = recomputeScores;
-    });
-
-    recomputeScores();
-    openModal("modal-scorer");
-  }
-
-  // --- Context Menu & Tooltips ---
+  // --- Context Menu ---
   function showContextMenu(e, modelId) {
     e.preventDefault();
     state.contextTargetId = modelId;
     const menu = document.getElementById("context-menu");
     menu.style.display = "block";
-    menu.style.left = `${Math.min(window.innerWidth - 200, e.clientX)}px`;
-    menu.style.top = `${Math.min(window.innerHeight - 200, e.clientY)}px`;
+    menu.style.left = `${Math.min(window.innerWidth - 220, e.clientX)}px`;
+    menu.style.top = `${Math.min(window.innerHeight - 240, e.clientY)}px`;
   }
 
   function hideContextMenu() {
-    document.getElementById("context-menu").style.display = "none";
+    const menu = document.getElementById("context-menu");
+    if (menu) menu.style.display = "none";
   }
 
   // --- Event Listeners Setup ---
   function setupEventListeners() {
-    // View preset tabs
+    // 1. View preset tabs
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.onclick = () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         state.activeView = btn.dataset.view;
+
+        if (state.activeView === "scorer") {
+          state.sortKey = "custom_score";
+          state.sortAsc = false;
+        } else if (state.sortKey === "custom_score") {
+          state.sortKey = "hf_v2_avg";
+          state.sortAsc = false;
+        }
+
         renderTable();
       };
     });
 
-    // Search Input
+    // 2. Search Input
     const searchInput = document.getElementById("search-input");
     searchInput.oninput = (e) => {
       state.searchQuery = e.target.value;
       renderTable();
     };
 
-    // Quantization Selector
+    // 3. Quantization Selector
     document.getElementById("quant-select").onchange = (e) => {
       state.currentQuant = e.target.value;
       renderTable();
     };
 
-    // VRAM Slider
+    // 4. VRAM Slider
     const vramSlider = document.getElementById("vram-slider");
     vramSlider.oninput = (e) => {
       const val = parseInt(e.target.value, 10);
@@ -848,7 +965,7 @@
       renderTable();
     };
 
-    // Parameter Range
+    // 5. Parameter Range
     document.getElementById("min-params").oninput = (e) => {
       state.minParams = e.target.value ? parseFloat(e.target.value) : null;
       renderTable();
@@ -858,44 +975,142 @@
       renderTable();
     };
 
-    // Reset Filters
+    // 6. Reset Filters
     document.getElementById("btn-reset-filters").onclick = () => {
       state.searchQuery = "";
       state.vramBudget = null;
       state.minParams = null;
       state.maxParams = null;
       state.currentQuant = "bf16";
+      state.beatModelId = null;
+      Object.keys(state.benchmarkThresholds).forEach(k => {
+        state.benchmarkThresholds[k] = null;
+      });
+
       searchInput.value = "";
       vramSlider.value = 320;
       document.getElementById("vram-val").textContent = "All";
       document.getElementById("min-params").value = "";
       document.getElementById("max-params").value = "";
       document.getElementById("quant-select").value = "bf16";
+      document.getElementById("beat-model-select").value = "";
+      document.getElementById("beat-status-badge").style.display = "none";
+
+      ["ifeval", "math", "gpqa", "bbh", "mmlu", "musr", "elo"].forEach(k => {
+        const inp = document.getElementById(`min-${k}`);
+        if (inp) inp.value = "";
+      });
+
       renderTable();
     };
 
-    // Header buttons
+    // 7. Toggle Advanced Filters Panel
+    document.getElementById("btn-toggle-adv-filter").onclick = () => {
+      const panel = document.getElementById("advanced-filters-panel");
+      panel.classList.toggle("open");
+      const btn = document.getElementById("btn-toggle-adv-filter");
+      btn.classList.toggle("btn-active", panel.classList.contains("open"));
+    };
+
+    // 8. Apply "Beat Model" Filter
+    document.getElementById("btn-apply-beat").onclick = () => {
+      const sel = document.getElementById("beat-model-select");
+      state.beatModelId = sel.value || null;
+      state.beatCriteria.all = document.getElementById("beat-all").checked;
+      state.beatCriteria.math_hard = document.getElementById("beat-math").checked;
+      state.beatCriteria.ifeval = document.getElementById("beat-ifeval").checked;
+      state.beatCriteria.gpqa = document.getElementById("beat-gpqa").checked;
+      state.beatCriteria.bbh = document.getElementById("beat-bbh").checked;
+      state.beatCriteria.mmlu_pro = document.getElementById("beat-mmlu").checked;
+      state.beatCriteria.arena_elo = document.getElementById("beat-elo").checked;
+      state.beatCriteria.vram = document.getElementById("beat-vram").checked;
+
+      const badge = document.getElementById("beat-status-badge");
+      if (state.beatModelId) {
+        badge.style.display = "block";
+        badge.textContent = `Active Filter: Matching or beating ${state.beatModelId}`;
+      } else {
+        badge.style.display = "none";
+      }
+      renderTable();
+    };
+
+    document.getElementById("btn-clear-beat").onclick = () => {
+      state.beatModelId = null;
+      document.getElementById("beat-model-select").value = "";
+      document.getElementById("beat-status-badge").style.display = "none";
+      renderTable();
+    };
+
+    // 9. Benchmark Score Threshold Inputs
+    const thresholdMapping = {
+      "min-ifeval": "ifeval",
+      "min-math": "math_hard",
+      "min-gpqa": "gpqa",
+      "min-bbh": "bbh",
+      "min-mmlu": "mmlu_pro",
+      "min-musr": "musr",
+      "min-elo": "arena_elo"
+    };
+    Object.keys(thresholdMapping).forEach(id => {
+      const inp = document.getElementById(id);
+      if (inp) {
+        inp.oninput = (e) => {
+          const key = thresholdMapping[id];
+          state.benchmarkThresholds[key] = e.target.value ? parseFloat(e.target.value) : null;
+          renderTable();
+        };
+      }
+    });
+
+    // 10. Scorer Presets
+    document.getElementById("preset-balanced").onclick = () => {
+      state.customWeights = { ifeval: 1.0, bbh: 1.0, math_hard: 1.0, gpqa: 1.0, musr: 1.0, mmlu_pro: 1.0, arena_elo: 1.0 };
+      renderScorerSliders();
+      renderTable();
+    };
+    document.getElementById("preset-math").onclick = () => {
+      state.customWeights = { ifeval: 0.5, bbh: 1.5, math_hard: 3.0, gpqa: 2.5, musr: 0.5, mmlu_pro: 1.2, arena_elo: 0.5 };
+      renderScorerSliders();
+      renderTable();
+    };
+    document.getElementById("preset-code").onclick = () => {
+      state.customWeights = { ifeval: 2.5, bbh: 1.5, math_hard: 1.8, gpqa: 1.0, musr: 1.5, mmlu_pro: 1.5, arena_elo: 1.0 };
+      renderScorerSliders();
+      renderTable();
+    };
+    document.getElementById("preset-chat").onclick = () => {
+      state.customWeights = { ifeval: 1.8, bbh: 1.0, math_hard: 0.5, gpqa: 0.8, musr: 1.0, mmlu_pro: 1.0, arena_elo: 3.0 };
+      renderScorerSliders();
+      renderTable();
+    };
+
+    // 11. Header Buttons
     document.getElementById("btn-open-pareto").onclick = showParetoModal;
     document.getElementById("btn-open-audit").onclick = showAuditModal;
-    document.getElementById("btn-open-scorer").onclick = showScorerModal;
     document.getElementById("btn-open-compare").onclick = showCompareModal;
 
-    // Pareto Metric & Quant switcher
+    // Pareto Info Modal
+    document.getElementById("btn-pareto-info").onclick = () => {
+      openModal("modal-pareto-info");
+    };
+
+    // Pareto Metric & Quant Switcher
     document.getElementById("pareto-metric-select").onchange = showParetoModal;
     document.getElementById("pareto-quant-select").onchange = showParetoModal;
 
-    // Table Header Click for Sorting
+    // 12. Table Head: Sorting & Select All
     document.getElementById("table-head").onclick = (e) => {
       const th = e.target.closest("th");
       if (!th) return;
 
-      if (th.querySelector("#select-all-cb")) {
-        const cb = th.querySelector("#select-all-cb");
-        const allVisible = getFilteredModels();
-        if (state.selectedModelIds.size === allVisible.length) {
-          state.selectedModelIds.clear();
+      if (e.target.id === "select-all-cb" || th.querySelector("#select-all-cb")) {
+        const visibleModels = getFilteredModels();
+        const allSelected = visibleModels.every(m => state.selectedModelIds.has(m.model_id));
+        if (allSelected) {
+          visibleModels.forEach(m => state.selectedModelIds.delete(m.model_id));
         } else {
-          allVisible.forEach(m => state.selectedModelIds.add(m.model_id));
+          visibleModels.forEach(m => state.selectedModelIds.add(m.model_id));
         }
         renderTable();
         return;
@@ -913,21 +1128,28 @@
       renderTable();
     };
 
-    // Table Row Double Click & Single Click
+    // 13. Table Body: RELIABLE DOUBLE-CLICK & SINGLE-CLICK
     const tbody = document.getElementById("table-body");
+
+    // Double-click reliably opens scorecard without DOM re-render disruption
     tbody.ondblclick = (e) => {
+      if (e.target.closest("input[type='checkbox']")) return;
       const tr = e.target.closest("tr");
       if (tr && tr.dataset.modelId) {
         showScorecard(tr.dataset.modelId);
       }
     };
 
+    // Single click handles checkboxes or row highlighting WITHOUT re-rendering entire table
     tbody.onclick = (e) => {
       const cb = e.target.closest(".row-select-cb");
       if (cb) {
         const mid = cb.dataset.id;
-        if (cb.checked) state.selectedModelIds.add(mid);
-        else state.selectedModelIds.delete(mid);
+        if (cb.checked) {
+          state.selectedModelIds.add(mid);
+        } else {
+          state.selectedModelIds.delete(mid);
+        }
         updateCompareButton();
         const tr = cb.closest("tr");
         if (tr) tr.classList.toggle("selected", cb.checked);
@@ -936,16 +1158,13 @@
 
       const tr = e.target.closest("tr");
       if (tr && tr.dataset.modelId) {
-        const mid = tr.dataset.modelId;
-        if (state.selectedModelIds.has(mid)) {
-          state.selectedModelIds.delete(mid);
-        } else {
-          state.selectedModelIds.add(mid);
-        }
-        renderTable();
+        // Just mark active row
+        tbody.querySelectorAll("tr.active-row").forEach(r => r.classList.remove("active-row"));
+        tr.classList.add("active-row");
       }
     };
 
+    // Right-click context menu
     tbody.oncontextmenu = (e) => {
       const tr = e.target.closest("tr");
       if (tr && tr.dataset.modelId) {
@@ -953,7 +1172,7 @@
       }
     };
 
-    // Close Modals
+    // 14. Close Modals
     document.querySelectorAll("[data-close]").forEach(el => {
       el.onclick = () => {
         closeModal(el.dataset.close);
@@ -968,12 +1187,13 @@
       };
     });
 
-    // Context Menu Handlers
+    // 15. Context Menu Actions
     document.addEventListener("click", hideContextMenu);
 
     document.getElementById("ctx-open-scorecard").onclick = () => {
       if (state.contextTargetId) showScorecard(state.contextTargetId);
     };
+
     document.getElementById("ctx-toggle-compare").onclick = () => {
       if (state.contextTargetId) {
         if (state.selectedModelIds.has(state.contextTargetId)) {
@@ -981,17 +1201,35 @@
         } else {
           state.selectedModelIds.add(state.contextTargetId);
         }
-        renderTable();
+        updateCompareButton();
+        const cb = document.querySelector(`.row-select-cb[data-id="${state.contextTargetId}"]`);
+        if (cb) {
+          cb.checked = state.selectedModelIds.has(state.contextTargetId);
+          const tr = cb.closest("tr");
+          if (tr) tr.classList.toggle("selected", cb.checked);
+        }
       }
     };
+
+    document.getElementById("ctx-set-reference").onclick = () => {
+      if (state.contextTargetId) {
+        const sel = document.getElementById("beat-model-select");
+        sel.value = state.contextTargetId;
+        document.getElementById("advanced-filters-panel").classList.add("open");
+        document.getElementById("btn-apply-beat").click();
+      }
+    };
+
     document.getElementById("ctx-audit-model").onclick = () => {
       showAuditModal();
     };
+
     document.getElementById("ctx-copy-id").onclick = () => {
       if (state.contextTargetId) {
         navigator.clipboard.writeText(state.contextTargetId);
       }
     };
+
     document.getElementById("ctx-copy-markdown").onclick = () => {
       if (state.contextTargetId) {
         const m = state.models.find(x => x.model_id === state.contextTargetId);
@@ -1002,7 +1240,7 @@
       }
     };
 
-    // Export Table Button
+    // 16. Export Table
     document.getElementById("btn-export-table").onclick = () => {
       const models = getSortedModels();
       let md = `| Model | Org | Params | Architecture | HF v2 Avg | Arena Elo |\n| --- | --- | --- | --- | --- | --- |\n`;
@@ -1014,10 +1252,10 @@
       });
     };
 
-    // Delegated click on Pareto / Audit modal rows to open scorecard
+    // 17. Delegated click on Pareto / Audit / Scatter dots
     document.addEventListener("click", (e) => {
       const tr = e.target.closest("tr[data-model-id]");
-      if (tr && (tr.closest("#pareto-table") || tr.closest("#audit-table") || tr.closest("#scorer-results-table"))) {
+      if (tr && (tr.closest("#pareto-table") || tr.closest("#audit-table"))) {
         showScorecard(tr.dataset.modelId);
       }
       const dot = e.target.closest(".scatter-dot");

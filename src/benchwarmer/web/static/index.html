@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BenchWarmer - Offline LLM Benchmark Oracle & Pareto Routing</title>
+  <title>BenchWarmer - LLM Benchmark Leaderboards & Pareto Routing</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
@@ -16,15 +16,14 @@
         <div class="brand-title">
           BenchWarmer
           <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
-          <span class="badge badge-green" id="badge-model-count">46 Models</span>
+          <span class="badge badge-green" id="badge-model-count">80 Models</span>
         </div>
-        <div class="brand-subtitle" id="header-sha">Offline Zero-Dependency LLM Benchmark Oracle & Pareto Routing</div>
+        <div class="brand-subtitle" id="header-built-date">Current as of November 2026</div>
       </div>
     </div>
     <div class="header-actions">
       <button class="btn" id="btn-open-pareto">📈 Pareto Frontier</button>
       <button class="btn" id="btn-open-audit">🛡️ Contamination Audit</button>
-      <button class="btn" id="btn-open-scorer">⚖️ Custom Scorer</button>
       <button class="btn btn-accent" id="btn-open-compare" disabled>⚖️ Compare (<span id="compare-count">0</span>)</button>
       <button class="btn" id="btn-export-table">📥 Export</button>
     </div>
@@ -40,6 +39,24 @@
       <button class="tab-btn" data-view="math">🧮 Math & Reasoning</button>
       <button class="tab-btn" data-view="code">💻 Coding & IFEval</button>
       <button class="tab-btn" data-view="hardware">⚡ Hardware & VRAM</button>
+      <button class="tab-btn" data-view="scorer">⚖️ Custom Scorer</button>
+    </div>
+
+    <!-- Custom Scorer Panel (Visible when "Custom Scorer" tab is active) -->
+    <div class="scorer-panel" id="scorer-panel">
+      <div class="scorer-header">
+        <div class="scorer-title">⚖️ Weighted Benchmark Evaluation Model</div>
+        <div class="scorer-presets">
+          <span style="font-size: 12px; color: var(--text-secondary); align-self: center;">Workload Presets:</span>
+          <button class="btn btn-sm" id="preset-balanced">Balanced</button>
+          <button class="btn btn-sm" id="preset-math">Math & Logic</button>
+          <button class="btn btn-sm" id="preset-code">Code & Systems</button>
+          <button class="btn btn-sm" id="preset-chat">Chat & Human Pref</button>
+        </div>
+      </div>
+      <div class="scorer-grid" id="scorer-sliders-grid">
+        <!-- Rendered dynamically with human names and codes -->
+      </div>
     </div>
 
     <!-- Toolbar Filters -->
@@ -78,17 +95,89 @@
           <span>to</span>
           <input type="number" id="max-params" class="select-control" placeholder="Max" style="width: 70px;">
         </label>
+
+        <button class="btn btn-sm" id="btn-toggle-adv-filter">🎯 Benchmark Filters</button>
       </div>
 
       <div class="toolbar-group">
         <button class="btn btn-sm" id="btn-reset-filters">Reset Filters</button>
-        <span class="text-secondary" style="font-size: 12px;" id="match-count">46 models displayed</span>
+        <span class="text-secondary" style="font-size: 12px;" id="match-count">80 models displayed</span>
       </div>
     </div>
 
-    <div class="tip-banner">
-      <span>💡</span>
-      <span><strong>Double-click</strong> any model to open its full Scorecard with SVG radar chart and VRAM matrix, or <strong>right-click</strong> for context actions.</span>
+    <!-- Advanced Filters Expandable Panel -->
+    <div class="advanced-filters-panel" id="advanced-filters-panel">
+      <div class="adv-grid">
+        <!-- Match or Beat Reference Model -->
+        <div class="adv-card">
+          <div class="adv-card-title">
+            <span>🎯</span>
+            <span>Match or Beat Reference Model</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            Find models that match or outperform a chosen baseline model in your required areas:
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <select id="beat-model-select" class="select-control" style="flex: 1;">
+              <option value="">-- Choose baseline model --</option>
+            </select>
+            <button class="btn btn-sm btn-primary" id="btn-apply-beat">Apply</button>
+            <button class="btn btn-sm" id="btn-clear-beat">Clear</button>
+          </div>
+          <div class="beat-criteria-grid">
+            <label><input type="checkbox" id="beat-all" checked> All Capabilities (Overall)</label>
+            <label><input type="checkbox" id="beat-math"> Advanced Math (MATH Hard)</label>
+            <label><input type="checkbox" id="beat-ifeval"> Instruction Following (IFEval)</label>
+            <label><input type="checkbox" id="beat-gpqa"> Scientific Reasoning (GPQA)</label>
+            <label><input type="checkbox" id="beat-bbh"> Multi-Step Reasoning (BBH)</label>
+            <label><input type="checkbox" id="beat-mmlu"> Knowledge (MMLU-Pro)</label>
+            <label><input type="checkbox" id="beat-elo"> Human Preference (Arena Elo)</label>
+            <label><input type="checkbox" id="beat-vram"> Equal or Smaller VRAM</label>
+          </div>
+          <div id="beat-status-badge" style="font-size: 11px; color: var(--accent-cyan); display: none;"></div>
+        </div>
+
+        <!-- Benchmark Minimum Score Thresholds -->
+        <div class="adv-card">
+          <div class="adv-card-title">
+            <span>📊</span>
+            <span>Minimum Benchmark Score Thresholds</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);">
+            Filter models that satisfy your absolute capability requirements:
+          </div>
+          <div class="thresh-grid">
+            <div class="thresh-item">
+              <span>IFEval &ge;</span>
+              <input type="number" class="thresh-input" id="min-ifeval" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>MATH Hard &ge;</span>
+              <input type="number" class="thresh-input" id="min-math" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>GPQA &ge;</span>
+              <input type="number" class="thresh-input" id="min-gpqa" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>BBH &ge;</span>
+              <input type="number" class="thresh-input" id="min-bbh" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>MMLU-Pro &ge;</span>
+              <input type="number" class="thresh-input" id="min-mmlu" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>MuSR &ge;</span>
+              <input type="number" class="thresh-input" id="min-musr" min="0" max="100" placeholder="0 - 100">
+            </div>
+            <div class="thresh-item">
+              <span>Arena Elo &ge;</span>
+              <input type="number" class="thresh-input" id="min-elo" min="800" max="1500" placeholder="800 - 1500">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Models Table Container -->
@@ -211,21 +300,24 @@
         <div class="modal-title">
           📈 Pareto Optimal Frontier (Capability vs VRAM Footprint)
         </div>
-        <button class="modal-close" data-close="modal-pareto">&times;</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn btn-sm" id="btn-pareto-info">ℹ️ What does this chart show?</button>
+          <button class="modal-close" data-close="modal-pareto">&times;</button>
+        </div>
       </div>
       <div class="modal-body">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; gap: 12px; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <label class="range-control">
               <span>Metric:</span>
               <select id="pareto-metric-select" class="select-control">
                 <option value="hf_v2_avg" selected>HF v2 Average</option>
-                <option value="math_hard">MATH Hard</option>
-                <option value="ifeval">IFEval (Instruction Following)</option>
-                <option value="gpqa">GPQA (Diamond Reasoning)</option>
-                <option value="mmlu_pro">MMLU-Pro</option>
-                <option value="bbh">BigBench Hard (BBH)</option>
-                <option value="arena_elo_raw">Arena Elo Raw</option>
+                <option value="math_hard">Advanced Mathematics (MATH Hard)</option>
+                <option value="ifeval">Instruction Following (IFEval)</option>
+                <option value="gpqa">Scientific Reasoning (GPQA Diamond)</option>
+                <option value="mmlu_pro">Professional Knowledge (MMLU-Pro)</option>
+                <option value="bbh">Multi-Step Reasoning (BBH)</option>
+                <option value="arena_elo_raw">Human Preference (Arena Elo)</option>
               </select>
             </label>
             <label class="range-control">
@@ -239,7 +331,7 @@
             </label>
           </div>
           <div style="font-size: 12px; color: var(--text-secondary);">
-            Frontier points (glowing cyan) dominate all models below and to their right.
+            Frontier models (glowing line) maximize capability at every hardware memory budget.
           </div>
         </div>
 
@@ -266,6 +358,49 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" data-close="modal-pareto">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3.5: Pareto Explanation Modal -->
+  <div class="modal-overlay" id="modal-pareto-info">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title">
+          ℹ️ Understanding the Pareto Frontier (For Decision Makers)
+        </div>
+        <button class="modal-close" data-close="modal-pareto-info">&times;</button>
+      </div>
+      <div class="modal-body" style="font-size: 13px; line-height: 1.6; color: var(--text-primary);">
+        <p>
+          <strong>What is Pareto Efficiency?</strong><br>
+          In machine learning deployment, every model represents a fundamental engineering trade-off:
+          <strong>Capability</strong> (accuracy on benchmarks) vs. <strong>Hardware Cost</strong> (VRAM memory footprint in gigabytes).
+        </p>
+        <p>
+          <strong>The "No-Compromise" Frontier Curve:</strong><br>
+          The dashed cyan line connects the <em>Pareto-optimal models</em>. Each model on this curve is the best possible performer you can host for its memory size:
+          you cannot get higher performance without upgrading your GPU memory.
+        </p>
+        <p>
+          <strong>Why models below the line are inefficient:</strong><br>
+          Any model sitting underneath or to the right of the line is strictly dominated. That means there is another model that delivers equal or greater intelligence while fitting into less VRAM (saving GPU cost, latency, and power).
+        </p>
+        <p>
+          <strong>How to use this practically:</strong><br>
+          1. <em>Know your hardware budget</em>: (e.g. 16 GB for RTX 4080 / Mac M-series, 24 GB for RTX 4090, 80 GB for an A100/H100 instance).<br>
+          2. <em>Look at the vertical line at your VRAM limit</em>: The Pareto frontier model at or directly below that mark is the highest-intelligence model you can run!
+        </p>
+        <p>
+          <strong>Metric Guide:</strong><br>
+          &bull; <strong>HF v2 Average</strong>: General balanced reasoning and language performance.<br>
+          &bull; <strong>MATH Hard</strong>: Pure math logic, symbolic proof, and problem-solving.<br>
+          &bull; <strong>IFEval</strong>: Instruction adherence, tool formatting, and JSON compliance.<br>
+          &bull; <strong>Arena Elo</strong>: Natural human conversation, style, and helpfulness.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close="modal-pareto-info">Got it</button>
       </div>
     </div>
   </div>
@@ -303,47 +438,11 @@
     </div>
   </div>
 
-  <!-- Modal 5: Custom Scorer Modal -->
-  <div class="modal-overlay" id="modal-scorer">
-    <div class="modal-card" style="max-width: 900px;">
-      <div class="modal-header">
-        <div class="modal-title">
-          ⚖️ Custom Weighted Benchmark Scorer
-        </div>
-        <button class="modal-close" data-close="modal-scorer">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div style="font-size: 13px; color: var(--text-secondary);">
-          Adjust weight sliders to align model rankings with your specific workload priorities:
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;" id="scorer-weights-grid">
-          <!-- Dynamic weight sliders -->
-        </div>
-        <div style="margin-top: 10px;">
-          <div class="chart-title">Weighted Model Ranking</div>
-          <table class="sub-table" id="scorer-results-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Model</th>
-                <th>Weighted Score</th>
-                <th>Params</th>
-              </tr>
-            </thead>
-            <tbody id="scorer-results-body"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" data-close="modal-scorer">Close</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Right-Click Context Menu -->
   <div class="context-menu" id="context-menu">
     <div class="context-menu-item" id="ctx-open-scorecard">🔍 View Scorecard</div>
     <div class="context-menu-item" id="ctx-toggle-compare">⚖️ Toggle in Compare</div>
+    <div class="context-menu-item" id="ctx-set-reference">🎯 Use as "Beat This" Baseline</div>
     <div class="context-menu-item" id="ctx-audit-model">🛡️ Audit Contamination</div>
     <div class="context-menu-separator"></div>
     <div class="context-menu-item" id="ctx-copy-id">📋 Copy Model ID</div>

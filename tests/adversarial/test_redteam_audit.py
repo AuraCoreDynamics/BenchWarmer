@@ -273,7 +273,7 @@ class TestAdversarialRedTeam(unittest.TestCase):
 
         # Verify models table is intact
         all_models = self.bw.search("*", limit=100)
-        self.assertEqual(len(all_models), 46)
+        self.assertEqual(len(all_models), 80)
 
     def test_09_zero_external_runtime_dependencies(self):
         """Ensure no external third-party modules are loaded into sys.modules during execution."""

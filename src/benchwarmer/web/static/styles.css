@@ -77,17 +77,6 @@ body {
   gap: 8px;
 }
 
-.brand-title .badge {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  background: rgba(88, 166, 255, 0.15);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(88, 166, 255, 0.3);
-}
-
 .brand-subtitle {
   font-size: 12px;
   color: var(--text-secondary);
@@ -154,6 +143,12 @@ body {
   font-size: 12px;
 }
 
+.btn-active {
+  background: rgba(88, 166, 255, 0.25);
+  border-color: var(--accent-cyan);
+  color: #fff;
+}
+
 /* Badges */
 .badge {
   display: inline-block;
@@ -188,6 +183,7 @@ body {
   align-items: center;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .tab-btn {
@@ -216,6 +212,75 @@ body {
   font-weight: 600;
 }
 
+/* Scorer Panel */
+.scorer-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scorer-panel.open {
+  display: flex;
+}
+
+.scorer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.scorer-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scorer-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scorer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.weight-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.weight-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.weight-val {
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
 /* Filter & Controls Toolbar */
 .toolbar {
   background: var(--bg-secondary);
@@ -238,7 +303,7 @@ body {
 
 .search-wrapper {
   position: relative;
-  min-width: 280px;
+  min-width: 240px;
 }
 
 .search-input {
@@ -303,6 +368,89 @@ body {
   color: var(--text-primary);
   min-width: 48px;
   text-align: center;
+}
+
+/* Advanced Filters Panel */
+.advanced-filters-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+.advanced-filters-panel.open {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.adv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .adv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adv-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adv-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.beat-criteria-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.thresh-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.thresh-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.thresh-input {
+  padding: 4px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
 /* Table Area */
@@ -374,6 +522,10 @@ body {
   background-color: rgba(88, 166, 255, 0.12);
 }
 
+.models-table tbody tr.active-row {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
 .model-name-cell {
   font-weight: 600;
   color: var(--text-primary);
@@ -404,15 +556,6 @@ body {
   background: var(--accent-cyan);
   vertical-align: middle;
   margin-left: 6px;
-}
-
-.tip-banner {
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 0;
 }
 
 /* Modals */

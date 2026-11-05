@@ -18,6 +18,17 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT_DIR / "src"))
 from benchwarmer.db.connector import compute_canonical_checksum
 
+FRONTIER_BENCHMARKS = {
+    "swe_bench_verified",
+    "swe_bench_pro",
+    "cybergym",
+    "hle_tools",
+    "aime_2024",
+    "codeforces_elo",
+    "livecodebench",
+    "math500",
+}
+
 MODELS_SEED_DATA = [
     # --- OpenAI Proprietary & Historical Models ---
     {
@@ -68,7 +79,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 92.40, "bbh": 94.60, "math_hard": 96.80,
-            "gpqa": 84.50, "musr": 74.80, "mmlu_pro": 90.80, "arena_elo": 1395.0
+            "gpqa": 84.50, "musr": 74.80, "mmlu_pro": 90.80, "arena_elo": 1395.0,
+            "swe_bench_verified": 84.80, "aime_2024": 96.70, "hle_tools": 54.20, "codeforces_elo": 2727.0
         }
     },
     {
@@ -85,7 +97,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 89.20, "bbh": 92.50, "math_hard": 94.80,
-            "gpqa": 77.30, "musr": 66.40, "mmlu_pro": 87.20, "arena_elo": 1355.0
+            "gpqa": 77.30, "musr": 66.40, "mmlu_pro": 87.20, "arena_elo": 1355.0,
+            "swe_bench_verified": 73.30, "aime_2024": 83.30, "hle_tools": 39.80, "codeforces_elo": 2164.0
         }
     },
     {
@@ -102,7 +115,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 86.10, "bbh": 90.80, "math_hard": 92.40,
-            "gpqa": 71.20, "musr": 63.50, "mmlu_pro": 84.00, "arena_elo": 1330.0
+            "gpqa": 71.20, "musr": 63.50, "mmlu_pro": 84.00, "arena_elo": 1330.0,
+            "swe_bench_verified": 69.10, "aime_2024": 87.30, "codeforces_elo": 2073.0
         }
     },
     {
@@ -343,7 +357,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 91.80, "bbh": 95.20, "math_hard": 92.50,
-            "gpqa": 94.60, "musr": 89.40, "mmlu_pro": 93.60, "arena_elo": 1420.0
+            "gpqa": 94.60, "musr": 89.40, "mmlu_pro": 93.60, "arena_elo": 1420.0,
+            "swe_bench_verified": 93.90, "swe_bench_pro": 77.80, "cybergym": 83.10, "hle_tools": 64.70
         }
     },
     {
@@ -360,7 +375,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 92.40, "bbh": 96.00, "math_hard": 93.80,
-            "gpqa": 95.20, "musr": 90.10, "mmlu_pro": 94.10, "arena_elo": 1425.0
+            "gpqa": 95.20, "musr": 90.10, "mmlu_pro": 94.10, "arena_elo": 1425.0,
+            "swe_bench_verified": 94.80, "swe_bench_pro": 80.20, "cybergym": 86.50, "hle_tools": 67.20
         }
     },
     {
@@ -377,7 +393,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 89.70, "bbh": 91.00, "math_hard": 86.40,
-            "gpqa": 89.20, "musr": 84.50, "mmlu_pro": 87.50, "arena_elo": 1355.0
+            "gpqa": 89.20, "musr": 84.50, "mmlu_pro": 87.50, "arena_elo": 1355.0,
+            "swe_bench_verified": 74.20, "swe_bench_pro": 58.50, "cybergym": 42.00, "hle_tools": 45.20
         }
     },
     {
@@ -394,7 +411,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 91.80, "bbh": 93.50, "math_hard": 95.00,
-            "gpqa": 82.50, "musr": 72.50, "mmlu_pro": 89.80, "arena_elo": 1388.0
+            "gpqa": 82.50, "musr": 72.50, "mmlu_pro": 89.80, "arena_elo": 1388.0,
+            "swe_bench_verified": 70.30, "swe_bench_pro": 53.00, "hle_tools": 44.10
         }
     },
     {
@@ -464,7 +482,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 89.00, "bbh": 92.50, "math_hard": 91.00,
-            "gpqa": 84.00, "musr": 78.00, "mmlu_pro": 88.50, "arena_elo": 1395.0
+            "gpqa": 84.00, "musr": 78.00, "mmlu_pro": 88.50, "arena_elo": 1395.0,
+            "swe_bench_verified": 78.40, "aime_2024": 87.00, "hle_tools": 48.60
         }
     },
     {
@@ -878,7 +897,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 83.30, "bbh": 92.10, "math_hard": 97.30,
-            "gpqa": 75.90, "musr": 64.20, "mmlu_pro": 84.40, "arena_elo": 1362.0
+            "gpqa": 75.90, "musr": 64.20, "mmlu_pro": 84.40, "arena_elo": 1362.0,
+            "swe_bench_verified": 49.20, "aime_2024": 79.80, "codeforces_elo": 2029.0
         }
     },
     {
@@ -1982,6 +2002,11 @@ def build_seed_database(target_db: Path, schema_file: Path) -> str:
                 metric = "elo"
                 raw_score = float(val)
                 score = normalize_arena_elo(raw_score)
+            elif bench in FRONTIER_BENCHMARKS:
+                suite = "frontier_evals"
+                metric = "raw"
+                raw_score = float(val)
+                score = float(val) if bench != "codeforces_elo" else min(100.0, float(val) / 30.0)
             else:
                 suite = "hf_v2"
                 metric = "norm_score"

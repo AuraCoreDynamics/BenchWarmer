@@ -23,6 +23,17 @@ sys.path.insert(0, str(ROOT_DIR / "src"))
 from benchwarmer.contracts import ServiceUnavailableError
 from benchwarmer.db.connector import compute_canonical_checksum
 
+FRONTIER_BENCHMARKS = {
+    "swe_bench_verified",
+    "swe_bench_pro",
+    "cybergym",
+    "hle_tools",
+    "aime_2024",
+    "codeforces_elo",
+    "livecodebench",
+    "math500",
+}
+
 
 def normalize_elo(raw_elo: float) -> float:
     min_elo = 800.0
@@ -146,6 +157,11 @@ def populate_database(records: List[Dict], target_db: Path, schema_file: Path) -
                 metric = "elo"
                 raw_score = fval
                 score = normalize_elo(fval)
+            elif bench_name in FRONTIER_BENCHMARKS:
+                suite = "frontier_evals"
+                metric = "raw"
+                raw_score = fval
+                score = fval if bench_name != "codeforces_elo" else min(100.0, fval / 30.0)
             else:
                 suite = "hf_v2"
                 metric = "norm_score"

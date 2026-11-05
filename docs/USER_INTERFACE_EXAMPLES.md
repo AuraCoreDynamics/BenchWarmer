@@ -15,7 +15,8 @@ All screenshots in this document are automatically captured directly from live b
 6. [Contamination & Goodhart Overfit Audits](#6-contamination--goodhart-overfit-audits)
 7. [Custom Weighted Multi-Objective Scorer](#7-custom-weighted-multi-objective-scorer)
 8. [Advanced Benchmark Filtering & "Match or Beat" Baseline](#8-advanced-benchmark-filtering--match-or-beat-baseline)
-9. [Automated Selenium Testing & Screenshot Pipeline](#9-automated-selenium-testing--screenshot-pipeline)
+9. [Distinctive Frontier Evaluations & Benchmark Hover Tooltips](#9-distinctive-frontier-evaluations--benchmark-hover-tooltips)
+10. [Automated Selenium Testing & Screenshot Pipeline](#10-automated-selenium-testing--screenshot-pipeline)
 
 ---
 
@@ -132,7 +133,26 @@ When upgrading or replacing an existing deployed model, the **🎯 Benchmark Fil
 
 ---
 
-## 9. Automated Selenium Testing & Screenshot Pipeline
+## 9. Distinctive Frontier Evaluations & Benchmark Hover Tooltips
+
+Modern frontier models introduce distinctive, high-difficulty benchmarks tailored to autonomous agentic workflows, software engineering, cyber-security reasoning, and international olympiad mathematics. BenchWarmer preserves these distinctive metrics without skewing standard normalized leaderboard averages.
+
+![Frontier Evaluations & Scorecard](screenshots/09_frontier_evals_scorecard.png)
+
+### Key Capabilities:
+- **Universal Identifier Hover Tooltips**: Hovering over any benchmark column header (`HF v2 Avg`, `IFEval`, `BBH`, `MATH`, `GPQA`, `MuSR`, `MMLU-Pro`, `Arena Elo`) or metric card instantly surfaces a native tooltip with the benchmark's full canonical name and exact evaluation description.
+- **🎯 Distinctive & Frontier Evaluations**: Models with unique evaluations (such as `claude-mythos-preview`, `claude-mythos-5`, `claude-fable`, `claude-3-7-sonnet`, `o3`, `o1`, `gemini-2.5-pro`, `DeepSeek-R1`) dynamically display dedicated domain cards:
+  - **SWE-bench Verified**: Real-world GitHub issue resolution with human-validated test harnesses and verification.
+  - **SWE-bench Pro**: Complex multi-file agentic software engineering benchmark demanding deep architectural comprehension.
+  - **CyberGym CTF**: Autonomous cyber-security evaluation across vulnerability exploitation, defense analysis, and capture-the-flag challenges.
+  - **Humanity's Last Exam (HLE w/ Tools)**: Multi-disciplinary frontier reasoning benchmark at the bleeding edge of human knowledge.
+  - **AIME 2024**: American Invitational Mathematics Examination high-school olympiad math pass@1 accuracy.
+  - **Codeforces Elo**: Competitive programming simulated Elo rating on live contests.
+- **Fail-Safe Scorecard Launching**: Double-clicking any table row or clicking the 📊 icon / model name link reliably launches the model scorecard across repeated modal openings and dynamic filter applications.
+
+---
+
+## 10. Automated Selenium Testing & Screenshot Pipeline
 
 All user interface screenshots in this documentation are programmatically generated and verified via BenchWarmer's automated Selenium test harness.
 

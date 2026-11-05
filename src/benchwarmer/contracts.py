@@ -1,6 +1,6 @@
 """Immutable typed data contracts, error types, and quantization mappings for BenchWarmer."""
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from typing import Dict, List, Optional, Any
 
 QUANT_BITS_MAP: Dict[str, float] = {
@@ -51,6 +51,7 @@ class ModelRecord:
     scores: Dict[str, float]            # benchmark -> normalized 0-100 score
     raw_scores: Dict[str, float]        # benchmark -> raw score
     estimated_vram_gb: Dict[str, float] # quant_name -> estimated VRAM GB (weights + 15% overhead)
+    distinctive_benchmarks: Dict[str, float] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

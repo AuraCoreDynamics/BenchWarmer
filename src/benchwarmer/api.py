@@ -152,15 +152,18 @@ class BenchWarmer:
             return None
 
         cursor.execute(
-            "SELECT benchmark, score, raw_score FROM benchmark_scores WHERE model_id = ?",
+            "SELECT suite, benchmark, score, raw_score FROM benchmark_scores WHERE model_id = ?",
             (resolved,),
         )
         scores: Dict[str, float] = {}
         raw_scores: Dict[str, float] = {}
+        distinctive_benchmarks: Dict[str, float] = {}
         for s_row in cursor.fetchall():
             bench = s_row["benchmark"]
             scores[bench] = float(s_row["score"])
             raw_scores[bench] = float(s_row["raw_score"])
+            if s_row["suite"] == "frontier_evals":
+                distinctive_benchmarks[bench] = float(s_row["raw_score"])
 
         params_b = float(m_row["params_b"]) if m_row["params_b"] is not None else None
         active_params_b = float(m_row["active_params_b"]) if m_row["active_params_b"] is not None else params_b
@@ -190,6 +193,7 @@ class BenchWarmer:
             scores=scores,
             raw_scores=raw_scores,
             estimated_vram_gb=estimated_vram_gb,
+            distinctive_benchmarks=distinctive_benchmarks,
         )
         self._model_cache[resolved] = record
         return record
@@ -791,6 +795,21 @@ class BenchWarmer:
             """
         )
         rows = cursor.fetchall()
+
+        cursor.execute(
+            """
+            SELECT model_id, benchmark, raw_score
+            FROM benchmark_scores
+            WHERE suite = 'frontier_evals'
+            """
+        )
+        distinctive_map: Dict[str, Dict[str, float]] = {}
+        for d_row in cursor.fetchall():
+            mid = d_row["model_id"]
+            if mid not in distinctive_map:
+                distinctive_map[mid] = {}
+            distinctive_map[mid][d_row["benchmark"]] = float(d_row["raw_score"])
+
         models_list: List[Dict[str, Any]] = []
 
         for row in rows:
@@ -834,6 +853,7 @@ class BenchWarmer:
                     "raw_scores": {
                         "arena_elo": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
                     },
+                    "distinctive_benchmarks": distinctive_map.get(row["model_id"], {}),
                     "hf_v2_avg": float(row["hf_v2_avg"]) if row["hf_v2_avg"] is not None else None,
                     "arena_elo_raw": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
                 }

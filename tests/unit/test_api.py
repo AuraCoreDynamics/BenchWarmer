@@ -207,6 +207,16 @@ class TestBenchWarmerAPI(unittest.TestCase):
         self.assertEqual(mythos.raw_scores["gpqa"], 94.60)
         self.assertEqual(mythos.raw_scores["mmlu_pro"], 93.60)
         self.assertEqual(mythos.raw_scores["arena_elo"], 1420.0)
+        self.assertEqual(mythos.distinctive_benchmarks["swe_bench_verified"], 93.90)
+        self.assertEqual(mythos.distinctive_benchmarks["swe_bench_pro"], 77.80)
+        self.assertEqual(mythos.distinctive_benchmarks["cybergym"], 83.10)
+        self.assertEqual(mythos.distinctive_benchmarks["hle_tools"], 64.70)
+
+        o3 = self.bw.get_model("openai/o3")
+        self.assertIsNotNone(o3)
+        self.assertEqual(o3.distinctive_benchmarks["swe_bench_verified"], 84.80)
+        self.assertEqual(o3.distinctive_benchmarks["codeforces_elo"], 2727.0)
+        self.assertEqual(o3.distinctive_benchmarks["aime_2024"], 96.70)
 
         fable = self.bw.get_model("anthropic/claude-fable")
         self.assertIsNotNone(fable)

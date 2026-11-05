@@ -259,7 +259,9 @@
         <div class="chart-grid">
           <div class="chart-card">
             <div class="chart-title">Capability Radar Profile (0 - 100)</div>
-            <svg id="sc-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+            <div id="sc-radar-slot">
+              <svg id="sc-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+            </div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 14px;">
             <div class="chart-title">Benchmark Evaluations</div>
@@ -275,6 +277,15 @@
               <div id="sc-audit-desc" style="font-size: 12px; color: var(--text-secondary);">No contamination flags detected.</div>
             </div>
           </div>
+        </div>
+
+        <!-- Distinctive Frontier Evaluations (rendered dynamically when present) -->
+        <div id="sc-distinctive-container" style="display: none; margin-top: 14px;">
+          <div class="chart-title" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <span>🎯 Distinctive & Frontier Evaluations</span>
+            <span class="badge badge-purple" style="font-size: 11px;">Unique Domain Metrics</span>
+          </div>
+          <div class="metric-cards-grid" id="sc-distinctive-cards"></div>
         </div>
 
         <!-- VRAM Quantization Matrix -->
@@ -316,7 +327,9 @@
         <div class="chart-grid">
           <div class="chart-card">
             <div class="chart-title">Multi-Model Radar Comparison</div>
-            <svg id="cmp-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+            <div id="cmp-radar-slot">
+              <svg id="cmp-radar-svg" class="svg-chart" viewBox="0 0 340 340"></svg>
+            </div>
             <div id="cmp-radar-legend" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; font-size: 12px;"></div>
           </div>
           <div class="chart-card">

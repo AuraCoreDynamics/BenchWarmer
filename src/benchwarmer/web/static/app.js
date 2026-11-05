@@ -32,6 +32,149 @@
     { key: "mmlu_pro", label: "MMLU-Pro" }
   ];
 
+  const BENCHMARK_INFO = {
+    ifeval: {
+      name: "IFEval",
+      full_name: "Instruction Following Evaluation (IFEval)",
+      description: "Evaluates strict adherence to verifiable constraints such as formatting, word count limits, negative constraints, and schema conformance."
+    },
+    bbh: {
+      name: "BBH",
+      full_name: "Big-Bench Hard (BBH)",
+      description: "23 challenging multi-step algorithmic reasoning tasks requiring multi-hop deduction, symbolic manipulation, and algorithmic tracing."
+    },
+    math_hard: {
+      name: "MATH Hard",
+      full_name: "Advanced Mathematics (MATH Level 5)",
+      description: "Challenging competition-grade mathematics problems spanning high school olympiad algebra, geometry, number theory, and calculus."
+    },
+    gpqa: {
+      name: "GPQA",
+      full_name: "Graduate-Level Scientific Reasoning (GPQA Diamond)",
+      description: "Biology, physics, and chemistry questions written and peer-validated by domain PhD experts, designed to resist Google search retrieval."
+    },
+    musr: {
+      name: "MuSR",
+      full_name: "Multistep Soft Reasoning (MuSR)",
+      description: "Evaluates reasoning over complex narrative contexts (murder mystery clues, object placement shifts, team logic puzzles)."
+    },
+    mmlu_pro: {
+      name: "MMLU-Pro",
+      full_name: "Massive Multitask Language Understanding Pro (MMLU-Pro)",
+      description: "A more rigorous, reasoning-focused benchmark with 10 options per question spanning STEM, medicine, law, economics, and humanities."
+    },
+    arena_elo: {
+      name: "Arena Elo",
+      full_name: "LMSYS Chatbot Arena Elo Rating",
+      description: "Crowdsourced blind human preference rating computed from thousands of head-to-head competitive model conversations."
+    },
+    arena_elo_raw: {
+      name: "Arena Elo",
+      full_name: "LMSYS Chatbot Arena Elo Rating",
+      description: "Crowdsourced blind human preference rating computed from thousands of head-to-head competitive model conversations."
+    },
+    hf_v2_avg: {
+      name: "HF v2 Avg",
+      full_name: "Open LLM Leaderboard v2 Average",
+      description: "Arithmetic mean across the 6 normalized official Hugging Face v2 benchmarks (IFEval, BBH, MATH Level 5, GPQA Diamond, MuSR, MMLU-Pro)."
+    },
+    custom_score: {
+      name: "Weighted Score",
+      full_name: "Custom Weighted Composite Score",
+      description: "Dynamic composite score calculated based on your custom benchmark weighting sliders in the Custom Scorer panel."
+    },
+    swe_bench_verified: {
+      name: "SWE-bench Verified",
+      full_name: "SWE-bench Verified (GitHub Issue Resolution)",
+      description: "Measures real-world software engineering capability by resolving genuine GitHub issues with human-validated test harnesses and verification."
+    },
+    swe_bench_pro: {
+      name: "SWE-bench Pro",
+      full_name: "SWE-bench Pro (Complex Multi-File Agentic SE)",
+      description: "Frontier multi-file software engineering benchmark demanding deep architectural comprehension, cross-file refactoring, and test suite execution."
+    },
+    cybergym: {
+      name: "CyberGym CTF",
+      full_name: "CyberGym Autonomous Security & CTF Challenges",
+      description: "Autonomous cyber-security evaluation across vulnerability exploitation, defense analysis, binary reverse engineering, and real-world CTF tasks."
+    },
+    hle_tools: {
+      name: "HLE w/ Tools",
+      full_name: "Humanity's Last Exam (with External Tools)",
+      description: "Multidisciplinary frontier reasoning benchmark composed of problems at the bleeding edge of human academia, allowing tool execution."
+    },
+    aime_2024: {
+      name: "AIME 2024",
+      full_name: "American Invitational Mathematics Examination (AIME 2024)",
+      description: "Prestigious high-school mathematics olympiad competition measuring elite mathematical proof, combinatorics, and number theory problem solving."
+    },
+    codeforces_elo: {
+      name: "Codeforces Elo",
+      full_name: "Codeforces Competitive Programming Elo",
+      description: "Simulated rating percentile on timed algorithmic programming competitions (Codeforces Division 1 & 2)."
+    },
+    livecodebench: {
+      name: "LiveCodeBench",
+      full_name: "LiveCodeBench (Pass@1)",
+      description: "Holistic, uncontaminated coding benchmark with continuously updated problems from LeetCode, AtCoder, and Codeforces."
+    },
+    math500: {
+      name: "MATH-500",
+      full_name: "MATH-500 Benchmark (Pass@1)",
+      description: "Standardized 500-problem subset of the challenging MATH dataset across all mathematical subjects."
+    },
+    rank: {
+      name: "Rank",
+      full_name: "Leaderboard Rank",
+      description: "Position of the model according to the current sorting metric."
+    },
+    model_id: {
+      name: "Model",
+      full_name: "Model Identifier & Provider",
+      description: "Unique model identifier and releasing organization. Click model name to view scorecard, or click provider tag to filter."
+    },
+    org: {
+      name: "Org",
+      full_name: "Provider / Releasing Organization",
+      description: "Organization, research lab, or creator that trained and released the model. Click to filter, right-click to clear."
+    },
+    params_b: {
+      name: "Params",
+      full_name: "Total Parameters (Billions)",
+      description: "Total count of model weights in billions (e.g. 70B, 8B). Cloud API models are marked Proprietary."
+    },
+    vram: {
+      name: "VRAM",
+      full_name: "Estimated VRAM Footprint (+15% Overhead)",
+      description: "Estimated GPU memory required to load model weights for the selected quantization level plus 15% KV-cache/runtime overhead."
+    },
+    context_length: {
+      name: "Context Window",
+      full_name: "Maximum Context Window Length",
+      description: "Maximum input and output token capacity the model supports (e.g. 128k, 200k, 1M, 2M tokens)."
+    },
+    architecture: {
+      name: "Architecture",
+      full_name: "Model Architecture Family",
+      description: "Underlying neural architecture family (e.g. LlamaForCausalLM, MistralForCausalLM, Qwen2ForCausalLM, Proprietary)."
+    },
+    precision: {
+      name: "Precision",
+      full_name: "Original Training Precision",
+      description: "Numerical precision format of the base weights (e.g. BF16, FP16, FP8, FP32)."
+    },
+    is_moe: {
+      name: "MoE",
+      full_name: "Architecture Type (Dense vs Mixture-of-Experts)",
+      description: "Whether the model routes tokens conditionally to specialized expert subnetworks (MoE) or activates all weights (Dense)."
+    },
+    license: {
+      name: "License",
+      full_name: "Weights & Usage License",
+      description: "Distribution license governing model weights, fine-tuning, and commercial deployment. Click to filter, right-click to clear."
+    }
+  };
+
   const PALETTE = [
     "#58a6ff", "#3fb950", "#d29922", "#bc8cff",
     "#f85149", "#f778ba", "#79c0ff", "#56d364"
@@ -521,11 +664,14 @@
         const isAllSelected = state.models.length > 0 && state.selectedModelIds.size === state.models.length;
         headHtml += `<th style="width: 40px; text-align: center;"><input type="checkbox" id="select-all-cb" ${isAllSelected ? "checked" : ""}></th>`;
       } else if (col.key === "rank") {
-        headHtml += `<th style="width: 60px;">${col.label}</th>`;
+        const info = BENCHMARK_INFO.rank || { full_name: "Rank", description: "" };
+        headHtml += `<th style="width: 60px;" class="bench-tooltip-th" title="${info.full_name}&#10;${info.description}">${col.label}</th>`;
       } else {
         const isSorted = state.sortKey === col.key;
         const sortClass = isSorted ? (state.sortAsc ? "sorted-asc" : "sorted-desc") : "";
-        headHtml += `<th class="${sortClass}" data-sort="${col.key}">${col.label}</th>`;
+        const info = BENCHMARK_INFO[col.key] || { name: col.label, full_name: col.label, description: "" };
+        const tooltip = info.description ? `${info.full_name}&#10;${info.description}` : info.full_name;
+        headHtml += `<th class="${sortClass} bench-tooltip-th" data-sort="${col.key}" title="${tooltip}"><span class="th-label-wrap">${col.label}</span> <span class="th-info-glyph" title="${tooltip}">ℹ️</span></th>`;
       }
     });
     headHtml += "</tr>";
@@ -590,38 +736,47 @@
           rowsHtml += `<td><span class="badge ${globalIdx < 3 ? 'badge-amber' : ''}">#${globalIdx + 1}</span></td>`;
         } else if (col.key === "model_id") {
           const orgBadge = `<span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span>`;
-          rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span>${m.model_name}</span></div></td>`;
+          rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span class="model-name-link" data-model-id="${m.model_id}" title="Click to view scorecard for ${m.model_name}">${m.model_name}</span> <button class="btn-icon-scorecard" data-model-id="${m.model_id}" title="Open Scorecard for ${m.model_name}">📊</button></div></td>`;
         } else if (col.key === "org") {
           rowsHtml += `<td><span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span></td>`;
         } else if (col.key === "custom_score") {
           const cs = computeCustomScore(m);
           const barW = Math.min(60, Math.round(cs * 0.6));
-          rowsHtml += `<td><span class="score-num" style="color: var(--accent-cyan); font-weight: 700;">${cs.toFixed(2)}</span><div class="score-bar-mini" style="width: ${barW}px; background: var(--accent-cyan);"></div></td>`;
+          const info = BENCHMARK_INFO.custom_score;
+          rowsHtml += `<td title="${info.full_name}&#10;${info.description}&#10;Score: ${cs.toFixed(2)}"><span class="score-num" style="color: var(--accent-cyan); font-weight: 700;">${cs.toFixed(2)}</span><div class="score-bar-mini" style="width: ${barW}px; background: var(--accent-cyan);"></div></td>`;
         } else if (col.key === "params_b") {
           const pDisp = m.params_b !== null ? `${m.params_b.toFixed(1)}B` : "Proprietary";
-          rowsHtml += `<td><span class="badge badge-cyan">${pDisp}</span></td>`;
+          const info = BENCHMARK_INFO.params_b;
+          rowsHtml += `<td title="${info.full_name}&#10;${info.description}"><span class="badge badge-cyan">${pDisp}</span></td>`;
         } else if (col.key === "vram") {
           const vram = m.estimated_vram_gb ? m.estimated_vram_gb[state.currentQuant] : 0;
+          const info = BENCHMARK_INFO.vram;
           if (vram > 0) {
             const tier = getHardwareTier(vram);
-            rowsHtml += `<td><span class="score-num">${vram.toFixed(1)} GB</span> <span class="badge ${tier.color}" style="font-size: 10px;">${tier.label.split("(")[0]}</span></td>`;
+            rowsHtml += `<td title="${info.full_name}&#10;${info.description}&#10;Quant: ${state.currentQuant.toUpperCase()}"><span class="score-num">${vram.toFixed(1)} GB</span> <span class="badge ${tier.color}" style="font-size: 10px;">${tier.label.split("(")[0]}</span></td>`;
           } else {
-            rowsHtml += `<td><span class="text-secondary">API Cloud</span></td>`;
+            rowsHtml += `<td title="${info.full_name}&#10;Cloud API proprietary model"><span class="text-secondary">API Cloud</span></td>`;
           }
         } else if (col.key === "hf_v2_avg") {
           const val = m.hf_v2_avg;
+          const info = BENCHMARK_INFO.hf_v2_avg;
+          const tooltip = `${info.full_name}&#10;${info.description}&#10;Score: ${val !== null && val !== undefined ? val.toFixed(2) : "N/A"}`;
           if (val !== null && val !== undefined) {
             const barW = Math.min(60, Math.round(val * 0.6));
-            rowsHtml += `<td><span class="score-num">${val.toFixed(2)}</span><div class="score-bar-mini" style="width: ${barW}px;"></div></td>`;
+            rowsHtml += `<td title="${tooltip}"><span class="score-num">${val.toFixed(2)}</span><div class="score-bar-mini" style="width: ${barW}px;"></div></td>`;
           } else {
-            rowsHtml += `<td><span class="text-secondary">-</span></td>`;
+            rowsHtml += `<td title="${tooltip}"><span class="text-secondary">-</span></td>`;
           }
         } else if (col.key === "arena_elo_raw") {
           const elo = m.raw_scores ? m.raw_scores.arena_elo : null;
-          rowsHtml += `<td><span class="score-num" style="color: var(--accent-purple);">${elo ? elo.toFixed(0) : "-"}</span></td>`;
+          const info = BENCHMARK_INFO.arena_elo;
+          const tooltip = `${info.full_name}&#10;${info.description}&#10;Elo: ${elo ? elo.toFixed(0) : "N/A"}`;
+          rowsHtml += `<td title="${tooltip}"><span class="score-num" style="color: var(--accent-purple);">${elo ? elo.toFixed(0) : "-"}</span></td>`;
         } else if (["ifeval", "bbh", "math_hard", "gpqa", "musr", "mmlu_pro"].includes(col.key)) {
           const val = m.scores ? m.scores[col.key] : null;
-          rowsHtml += `<td><span class="score-num">${val !== null && val !== undefined ? val.toFixed(1) : "-"}</span></td>`;
+          const info = BENCHMARK_INFO[col.key] || { name: col.key, full_name: col.key, description: "" };
+          const tooltip = `${info.full_name}&#10;${info.description}&#10;Score: ${val !== null && val !== undefined ? val.toFixed(1) : "N/A"}`;
+          rowsHtml += `<td title="${tooltip}"><span class="score-num">${val !== null && val !== undefined ? val.toFixed(1) : "-"}</span></td>`;
         } else if (col.key === "context_length") {
           const ctxDisp = m.context_length ? `${(m.context_length / 1000).toFixed(0)}k` : "N/A";
           rowsHtml += `<td><span class="badge">${ctxDisp}</span></td>`;
@@ -652,13 +807,14 @@
   }
 
   // --- SVG Charts Generation ---
-  function generateRadarSvg(dimensions, seriesList) {
+  function generateRadarSvg(dimensions, seriesList, svgId = "") {
     const size = 340;
     const center = size / 2;
     const radius = 110;
     const angleStep = (Math.PI * 2) / dimensions.length;
 
-    let svg = `<svg viewBox="0 0 ${size} ${size}" class="svg-chart">`;
+    const idAttr = svgId ? `id="${svgId}" ` : "";
+    let svg = `<svg ${idAttr}viewBox="0 0 ${size} ${size}" class="svg-chart">`;
 
     for (let r = 20; r <= 100; r += 20) {
       const cr = (r / 100) * radius;
@@ -717,111 +873,150 @@
 
   // Scorecard Modal
   async function showScorecard(modelId) {
-    const model = state.models.find(m => m.model_id === modelId);
-    if (!model) return;
+    try {
+      const model = state.models.find(m => m.model_id === modelId);
+      if (!model) return;
 
-    document.getElementById("sc-model-name").textContent = model.model_name;
-    document.getElementById("sc-org-badge").textContent = model.org;
-    document.getElementById("sc-params-badge").textContent = model.params_b ? `${model.params_b.toFixed(1)}B` : "Proprietary";
-    document.getElementById("sc-arch-badge").textContent = model.architecture || "Unknown";
+      document.getElementById("sc-model-name").textContent = model.model_name;
+      document.getElementById("sc-org-badge").textContent = model.org;
+      document.getElementById("sc-params-badge").textContent = model.params_b ? `${model.params_b.toFixed(1)}B` : "Proprietary";
+      document.getElementById("sc-arch-badge").textContent = model.architecture || "Unknown";
 
-    // Radar Chart
-    const radarContainer = document.getElementById("sc-radar-svg").parentNode;
-    const radarSvg = generateRadarSvg(RADAR_AXES, [{
-      name: model.model_name,
-      color: "#58a6ff",
-      values: model.scores || {}
-    }]);
-    radarContainer.querySelector("svg").outerHTML = radarSvg;
+      // Radar Chart - Safe persistent slot replacement
+      const radarSlot = document.getElementById("sc-radar-slot");
+      if (radarSlot) {
+        radarSlot.innerHTML = generateRadarSvg(RADAR_AXES, [{
+          name: model.model_name,
+          color: "#58a6ff",
+          values: model.scores || {}
+        }], "sc-radar-svg");
+      }
 
-    // Benchmark Cards
-    const cardsContainer = document.getElementById("sc-metric-cards");
-    let cardsHtml = "";
-    RADAR_AXES.forEach(dim => {
-      const val = model.scores ? model.scores[dim.key] : null;
-      cardsHtml += `
-        <div class="metric-card">
-          <div class="metric-card-label">${dim.label}</div>
-          <div class="metric-card-value">${val !== null && val !== undefined ? val.toFixed(1) : "N/A"}</div>
-          <div class="metric-card-raw">norm 0-100</div>
-        </div>
-      `;
-    });
-    // Add Arena Elo Card
-    const elo = model.raw_scores ? model.raw_scores.arena_elo : null;
-    cardsHtml += `
-      <div class="metric-card" style="border-color: rgba(188, 140, 255, 0.4);">
-        <div class="metric-card-label" style="color: var(--accent-purple);">Arena Elo</div>
-        <div class="metric-card-value" style="color: var(--accent-purple);">${elo ? elo.toFixed(0) : "N/A"}</div>
-        <div class="metric-card-raw">lmsys arena</div>
-      </div>
-    `;
-    cardsContainer.innerHTML = cardsHtml;
-
-    // VRAM Table
-    const vramTbody = document.getElementById("sc-vram-table").querySelector("tbody");
-    let vramHtml = "";
-    if (model.params_b) {
-      Object.keys(QUANT_BITS).forEach(qKey => {
-        const bits = QUANT_BITS[qKey];
-        const vram = model.estimated_vram_gb ? model.estimated_vram_gb[qKey] : 0;
-        const tier = getHardwareTier(vram);
-        vramHtml += `
-          <tr>
-            <td><strong>${qKey.toUpperCase()}</strong></td>
-            <td>${bits.toFixed(1)} bits</td>
-            <td><strong style="color: var(--accent-cyan);">${vram.toFixed(2)} GB</strong></td>
-            <td><span class="badge ${tier.color}">${tier.label}</span></td>
-          </tr>
+      // Standard Benchmark Cards with full title tooltips & descriptions
+      const cardsContainer = document.getElementById("sc-metric-cards");
+      let cardsHtml = "";
+      RADAR_AXES.forEach(dim => {
+        const val = model.scores ? model.scores[dim.key] : null;
+        const info = BENCHMARK_INFO[dim.key] || { name: dim.label, full_name: dim.label, description: "" };
+        const tooltip = info.description ? `${info.full_name}\n${info.description}` : info.full_name;
+        cardsHtml += `
+          <div class="metric-card" title="${tooltip}">
+            <div class="metric-card-label">${info.name} <span class="info-glyph">ℹ️</span></div>
+            <div class="metric-card-value">${val !== null && val !== undefined ? val.toFixed(1) : "N/A"}</div>
+            <div class="metric-card-raw">norm 0-100</div>
+          </div>
         `;
       });
-    } else {
-      vramHtml = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 12px;">Proprietary cloud model; parameters and local VRAM footprint are not applicable.</td></tr>`;
-    }
-    vramTbody.innerHTML = vramHtml;
+      // Add Arena Elo Card
+      const elo = model.raw_scores ? model.raw_scores.arena_elo : null;
+      const eloInfo = BENCHMARK_INFO.arena_elo || { full_name: "Arena Elo", description: "" };
+      const eloTooltip = `${eloInfo.full_name}\n${eloInfo.description}`;
+      cardsHtml += `
+        <div class="metric-card" style="border-color: rgba(188, 140, 255, 0.4);" title="${eloTooltip}">
+          <div class="metric-card-label" style="color: var(--accent-purple);">Arena Elo <span class="info-glyph">ℹ️</span></div>
+          <div class="metric-card-value" style="color: var(--accent-purple);">${elo ? elo.toFixed(0) : "N/A"}</div>
+          <div class="metric-card-raw">lmsys arena</div>
+        </div>
+      `;
+      cardsContainer.innerHTML = cardsHtml;
 
-    // Audit Info Fetch
-    try {
-      const auditRes = await fetch(`/api/audit/${encodeURIComponent(model.model_id)}`).then(r => r.json());
-      const badge = document.getElementById("sc-audit-badge");
-      const desc = document.getElementById("sc-audit-desc");
-      if (auditRes.status === "HIGH_CONTAMINATION_RISK") {
-        badge.className = "badge badge-red";
-        badge.textContent = "HIGH RISK CONTAMINATION";
-      } else if (auditRes.status === "SUSPICIOUS") {
-        badge.className = "badge badge-amber";
-        badge.textContent = "SUSPICIOUS";
-      } else {
-        badge.className = "badge badge-green";
-        badge.textContent = "CLEAN";
+      // Distinctive & Frontier Benchmarks Section
+      const distContainer = document.getElementById("sc-distinctive-container");
+      const distCards = document.getElementById("sc-distinctive-cards");
+      const distEvals = model.distinctive_benchmarks || {};
+      const distKeys = Object.keys(distEvals);
+      if (distContainer && distCards) {
+        if (distKeys.length > 0) {
+          let distHtml = "";
+          distKeys.forEach(k => {
+            const val = distEvals[k];
+            const info = BENCHMARK_INFO[k] || { name: k, full_name: k, description: "Frontier evaluation metric." };
+            const tooltip = info.description ? `${info.full_name}\n${info.description}` : info.full_name;
+            const dispVal = k === "codeforces_elo" ? `${Math.round(val)} Elo` : `${val.toFixed(1)}%`;
+            distHtml += `
+              <div class="metric-card distinctive-metric-card" title="${tooltip}">
+                <div class="metric-card-label" style="color: var(--accent-purple);">${info.name} <span class="info-glyph">ℹ️</span></div>
+                <div class="metric-card-value" style="color: var(--accent-purple);">${dispVal}</div>
+                <div class="metric-card-raw">${info.full_name}</div>
+              </div>
+            `;
+          });
+          distCards.innerHTML = distHtml;
+          distContainer.style.display = "block";
+        } else {
+          distContainer.style.display = "none";
+          distCards.innerHTML = "";
+        }
       }
-      const flagStr = auditRes.flags && auditRes.flags.length > 0 ? auditRes.flags.join(" | ") : "Model exhibits natural peer-group consistency.";
-      desc.textContent = `Anomaly Score: ${auditRes.anomaly_score.toFixed(1)} / 100. ${flagStr}`;
-    } catch (e) {
-      // Ignore
-    }
 
-    // Toggle Compare Button text
-    const cmpBtn = document.getElementById("sc-btn-compare-toggle");
-    cmpBtn.textContent = state.selectedModelIds.has(model.model_id) ? "Remove from Comparison" : "Add to Comparison";
-    cmpBtn.onclick = () => {
-      if (state.selectedModelIds.has(model.model_id)) {
-        state.selectedModelIds.delete(model.model_id);
+      // VRAM Table
+      const vramTbody = document.getElementById("sc-vram-table").querySelector("tbody");
+      let vramHtml = "";
+      if (model.params_b) {
+        Object.keys(QUANT_BITS).forEach(qKey => {
+          const bits = QUANT_BITS[qKey];
+          const vram = model.estimated_vram_gb ? model.estimated_vram_gb[qKey] : 0;
+          const tier = getHardwareTier(vram);
+          vramHtml += `
+            <tr>
+              <td><strong>${qKey.toUpperCase()}</strong></td>
+              <td>${bits.toFixed(1)} bits</td>
+              <td><strong style="color: var(--accent-cyan);">${vram.toFixed(2)} GB</strong></td>
+              <td><span class="badge ${tier.color}">${tier.label}</span></td>
+            </tr>
+          `;
+        });
       } else {
-        state.selectedModelIds.add(model.model_id);
+        vramHtml = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 12px;">Proprietary cloud model; parameters and local VRAM footprint are not applicable.</td></tr>`;
       }
+      vramTbody.innerHTML = vramHtml;
+
+      // Audit Info Fetch
+      try {
+        const auditRes = await fetch(`/api/audit/${encodeURIComponent(model.model_id)}`).then(r => r.json());
+        const badge = document.getElementById("sc-audit-badge");
+        const desc = document.getElementById("sc-audit-desc");
+        if (auditRes.status === "HIGH_CONTAMINATION_RISK") {
+          badge.className = "badge badge-red";
+          badge.textContent = "HIGH RISK CONTAMINATION";
+        } else if (auditRes.status === "SUSPICIOUS") {
+          badge.className = "badge badge-amber";
+          badge.textContent = "SUSPICIOUS";
+        } else {
+          badge.className = "badge badge-green";
+          badge.textContent = "CLEAN";
+        }
+        const flagStr = auditRes.flags && auditRes.flags.length > 0 ? auditRes.flags.join(" | ") : "Model exhibits natural peer-group consistency.";
+        desc.textContent = `Anomaly Score: ${auditRes.anomaly_score.toFixed(1)} / 100. ${flagStr}`;
+      } catch (e) {
+        // Ignore
+      }
+
+      // Toggle Compare Button text
+      const cmpBtn = document.getElementById("sc-btn-compare-toggle");
       cmpBtn.textContent = state.selectedModelIds.has(model.model_id) ? "Remove from Comparison" : "Add to Comparison";
-      updateCompareButton();
-      // Update checkbox in table if present
-      const cb = document.querySelector(`.row-select-cb[data-id="${model.model_id}"]`);
-      if (cb) {
-        cb.checked = state.selectedModelIds.has(model.model_id);
-        const tr = cb.closest("tr");
-        if (tr) tr.classList.toggle("selected", cb.checked);
-      }
-    };
+      cmpBtn.onclick = () => {
+        if (state.selectedModelIds.has(model.model_id)) {
+          state.selectedModelIds.delete(model.model_id);
+        } else {
+          state.selectedModelIds.add(model.model_id);
+        }
+        cmpBtn.textContent = state.selectedModelIds.has(model.model_id) ? "Remove from Comparison" : "Add to Comparison";
+        updateCompareButton();
+        // Update checkbox in table if present
+        const cb = document.querySelector(`.row-select-cb[data-id="${model.model_id}"]`);
+        if (cb) {
+          cb.checked = state.selectedModelIds.has(model.model_id);
+          const tr = cb.closest("tr");
+          if (tr) tr.classList.toggle("selected", cb.checked);
+        }
+      };
 
-    openModal("modal-scorecard");
+      openModal("modal-scorecard");
+    } catch (err) {
+      console.error("Failed to render scorecard modal:", err);
+      openModal("modal-scorecard");
+    }
   }
 
   // Multi-Model Compare Modal
@@ -844,9 +1039,11 @@
         values: m.scores || {}
       }));
 
-      const radarContainer = document.getElementById("cmp-radar-svg").parentNode;
-      const radarSvg = generateRadarSvg(RADAR_AXES, series);
-      radarContainer.querySelector("svg").outerHTML = radarSvg;
+      // Radar Chart - Safe persistent slot replacement
+      const cmpRadarSlot = document.getElementById("cmp-radar-slot");
+      if (cmpRadarSlot) {
+        cmpRadarSlot.innerHTML = generateRadarSvg(RADAR_AXES, series, "cmp-radar-svg");
+      }
 
       const legendContainer = document.getElementById("cmp-radar-legend");
       legendContainer.innerHTML = series.map(s => `
@@ -1349,6 +1546,14 @@
 
     // Single click handles checkboxes, clickable tags, or row highlighting WITHOUT re-rendering entire table
     tbody.onclick = (e) => {
+      // Click on model name link or scorecard button: open scorecard immediately!
+      const scBtn = e.target.closest(".model-name-link, .btn-icon-scorecard");
+      if (scBtn && scBtn.dataset.modelId) {
+        e.stopPropagation();
+        showScorecard(scBtn.dataset.modelId);
+        return;
+      }
+
       // Click on org-tag: auto-filter by provider
       const orgTag = e.target.closest(".org-tag[data-org]");
       if (orgTag) {

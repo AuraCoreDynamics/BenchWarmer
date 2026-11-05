@@ -222,6 +222,75 @@ class TestSeleniumUI(unittest.TestCase):
         driver.find_element(self.By.CSS_SELECTOR, "#modal-scorecard .modal-close").click()
         time.sleep(0.4)
 
+    def test_04b_scorecard_reopen_and_distinctive_evals_and_tooltips(self):
+        from selenium.webdriver.common.action_chains import ActionChains
+
+        driver = self.driver
+        try:
+            # 1. Assert benchmark column headers have full hover tooltips and descriptions
+            th_hf = driver.find_element(self.By.CSS_SELECTOR, "th[data-sort='hf_v2_avg']")
+            hf_title = th_hf.get_attribute("title")
+            self.assertIn("Leaderboard", hf_title)
+            self.assertIn("IFEval", hf_title)
+
+            th_elo = driver.find_element(self.By.CSS_SELECTOR, "th[data-sort='arena_elo_raw']")
+            self.assertIn("Chatbot Arena", th_elo.get_attribute("title"))
+
+            # 2. Assert reopening scorecard after previous close (verifying radar SVG ID preservation fix)
+            sc_buttons = driver.find_elements(self.By.CSS_SELECTOR, "#table-body tr .btn-icon-scorecard")
+            self.assertGreater(len(sc_buttons), 1)
+            sc_buttons[1].click()
+            self.WebDriverWait(driver, 5).until(
+                self.EC.visibility_of_element_located((self.By.ID, "modal-scorecard"))
+            )
+            time.sleep(0.4)
+            reopened_name = driver.find_element(self.By.ID, "sc-model-name").text
+            self.assertTrue(len(reopened_name) > 0)
+            driver.find_element(self.By.CSS_SELECTOR, "#modal-scorecard .modal-close").click()
+            time.sleep(0.4)
+
+            # 3. Search for 'mythos' to verify filter + scorecard opening + distinctive evals
+            search_input = driver.find_element(self.By.ID, "search-input")
+            search_input.clear()
+            search_input.send_keys("mythos")
+            time.sleep(0.5)
+
+            mythos_row = driver.find_element(self.By.CSS_SELECTOR, "#table-body tr")
+            actions = ActionChains(driver)
+            actions.double_click(mythos_row).perform()
+
+            self.WebDriverWait(driver, 5).until(
+                self.EC.visibility_of_element_located((self.By.ID, "modal-scorecard"))
+            )
+            time.sleep(0.6)
+
+            sc_name = driver.find_element(self.By.ID, "sc-model-name").text
+            self.assertIn("mythos", sc_name.lower())
+
+            # Assert Distinctive Frontier Evals container is visible and has cards
+            dist_container = driver.find_element(self.By.ID, "sc-distinctive-container")
+            self.assertTrue(dist_container.is_displayed())
+
+            dist_cards = driver.find_elements(self.By.CSS_SELECTOR, "#sc-distinctive-cards .metric-card")
+            self.assertGreaterEqual(len(dist_cards), 4)
+
+            # Verify SWE-bench and CyberGym are present in distinctive cards
+            dist_text = dist_container.text.lower()
+            self.assertIn("swe-bench verified", dist_text)
+            self.assertIn("cybergym", dist_text)
+
+            shot_path = SCREENSHOTS_DIR / "09_frontier_evals_scorecard.png"
+            driver.save_screenshot(str(shot_path))
+            self.assertTrue(shot_path.exists())
+        finally:
+            # Ensure modal is closed and search input is cleared even if assertions fail
+            try:
+                driver.execute_script("document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));")
+                driver.execute_script("document.getElementById('search-input').value = ''; document.getElementById('search-input').dispatchEvent(new Event('input'));")
+                time.sleep(0.4)
+            except Exception:
+                pass
+
     def test_05_multi_model_comparison_and_screenshot(self):
         driver = self.driver
         # Select checkboxes for first 3 rows

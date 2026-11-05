@@ -534,6 +534,55 @@ body {
   gap: 8px;
 }
 
+.model-name-link {
+  cursor: pointer;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: all 0.15s ease;
+}
+
+.model-name-link:hover {
+  color: var(--accent-cyan);
+  border-bottom: 1px dotted var(--accent-cyan);
+}
+
+.btn-icon-scorecard {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.btn-icon-scorecard:hover {
+  opacity: 1;
+  background: var(--accent-cyan-dim);
+  border-color: var(--accent-cyan);
+  transform: scale(1.08);
+}
+
+.bench-tooltip-th {
+  cursor: help;
+  position: relative;
+}
+
+.th-info-glyph {
+  font-size: 9px;
+  opacity: 0.45;
+  margin-left: 3px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bench-tooltip-th:hover .th-info-glyph {
+  opacity: 1;
+}
+
 .org-tag {
   font-size: 10px;
   font-weight: 600;
@@ -803,6 +852,22 @@ body {
 .metric-card-raw {
   font-size: 10px;
   color: var(--text-muted);
+}
+
+.distinctive-metric-card {
+  border: 1px solid rgba(188, 140, 255, 0.45);
+  background: rgba(188, 140, 255, 0.04);
+}
+
+.distinctive-metric-card:hover {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 10px rgba(188, 140, 255, 0.15);
+}
+
+.info-glyph {
+  font-size: 10px;
+  opacity: 0.6;
+  cursor: help;
 }
 
 /* Quantization Matrix Table */

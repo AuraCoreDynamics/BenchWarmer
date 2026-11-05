@@ -16,7 +16,9 @@ All screenshots in this document are automatically captured directly from live b
 7. [Custom Weighted Multi-Objective Scorer](#7-custom-weighted-multi-objective-scorer)
 8. [Advanced Benchmark Filtering & "Match or Beat" Baseline](#8-advanced-benchmark-filtering--match-or-beat-baseline)
 9. [Distinctive Frontier Evaluations & Benchmark Hover Tooltips](#9-distinctive-frontier-evaluations--benchmark-hover-tooltips)
-10. [Automated Selenium Testing & Screenshot Pipeline](#10-automated-selenium-testing--screenshot-pipeline)
+10. [Dedicated Frontier & Agentic Leaderboard View](#10-dedicated-frontier--agentic-leaderboard-view)
+11. [Hide Proprietary Toggle (Open Weights Only)](#11-hide-proprietary-toggle-open-weights-only)
+12. [Automated Selenium Testing & Screenshot Pipeline](#12-automated-selenium-testing--screenshot-pipeline)
 
 ---
 
@@ -152,7 +154,39 @@ Modern frontier models introduce distinctive, high-difficulty benchmarks tailore
 
 ---
 
-## 10. Automated Selenium Testing & Screenshot Pipeline
+## 10. Dedicated Frontier & Agentic Leaderboard View
+
+Clicking the **🚀 Frontier & Agentic** tab presents a purpose-built view preset focusing specifically on software engineering, autonomous security, competitive programming, and frontier reasoning benchmarks.
+
+![Frontier & Agentic Leaderboard](screenshots/10_frontier_agentic_leaderboard.png)
+
+### Frontier View Columns:
+- **SWE-bench Ver.**: Software engineering capability on verified human-reviewed GitHub issues.
+- **SWE-bench Pro**: Multi-file repository-level agentic problem solving.
+- **CyberGym**: Autonomous penetration testing and CTF challenge completion.
+- **HLE Tools**: Bleeding-edge multidisciplinary academia problem solving with tool access.
+- **AIME 2024**: High-school mathematics olympiad accuracy.
+- **Codeforces**: Algorithmic competitive programming Elo rating.
+- **Arena Elo & HF v2 Avg**: Standardized preference and normalized foundation benchmark anchors.
+
+Sorting defaults to `SWE-bench Verified`, directly highlighting premier coding and agentic models like `openai/gpt-5.6`, `anthropic/claude-4-opus`, `openai/gpt-5.4`, `google/gemini-3.0-pro`, and `anthropic/claude-mythos-preview`.
+
+---
+
+## 11. Hide Proprietary Toggle (Open Weights Only)
+
+For self-hosting, on-premise security, and sovereignty requirements (e.g. deployments managed via [AuraSeed](https://github.com/AuraCoreDynamics/auraseed)), the **Hide Proprietary** toggle instantly excludes proprietary API-gated cloud models and isolates open-weight models.
+
+![Open Weights Only Filter](screenshots/11_open_weights_only_filter.png)
+
+### Open-Weights Features:
+- **Instant Client-Side & API Filtering**: Excludes all 44 proprietary cloud endpoints (`license == "proprietary"` or `architecture == "Proprietary"`), displaying the 1,405 open-weight models across Meta, Qwen, Mistral, Nvidia, DeepSeek, and community releases.
+- **Active Filter Chip**: An amber **Open Weights Only** chip surfaces in the toolbar with a `✕` one-click restore button.
+- **Server API Support**: Supported via query parameter `GET /api/models?hide_proprietary=true` for headless scripting and pipeline integration.
+
+---
+
+## 12. Automated Selenium Testing & Screenshot Pipeline
 
 All user interface screenshots in this documentation are programmatically generated and verified via BenchWarmer's automated Selenium test harness.
 

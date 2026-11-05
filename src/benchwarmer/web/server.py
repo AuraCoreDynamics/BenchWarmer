@@ -76,12 +76,17 @@ def create_fastapi_app(bw: Optional[BenchWarmer] = None, db_path: Optional[str] 
         query: Optional[str] = None,
         min_params: Optional[float] = None,
         max_params: Optional[float] = None,
+        hide_proprietary: Optional[bool] = False,
     ):
         all_models = oracle.get_all_models_detailed()
-        if not query and min_params is None and max_params is None:
-            return all_models
-
         filtered = all_models
+        if hide_proprietary:
+            filtered = [
+                m for m in filtered
+                if (m.get("license") or "").lower() != "proprietary"
+                and (m.get("architecture") or "").lower() != "proprietary"
+                and m.get("params_b") is not None
+            ]
         if min_params is not None:
             filtered = [m for m in filtered if m["params_b"] is not None and m["params_b"] >= min_params]
         if max_params is not None:
@@ -187,6 +192,14 @@ def _run_stdlib_fallback_server(bw: BenchWarmer, host: str, port: int) -> None:
                 return self._send_json(200, bw.get_metadata())
             elif path == "/api/models":
                 all_models = bw.get_all_models_detailed()
+                hide_prop = qs.get("hide_proprietary", ["false"])[0].lower() in ("true", "1")
+                if hide_prop:
+                    all_models = [
+                        m for m in all_models
+                        if (m.get("license") or "").lower() != "proprietary"
+                        and (m.get("architecture") or "").lower() != "proprietary"
+                        and m.get("params_b") is not None
+                    ]
                 q = qs.get("query", [None])[0]
                 min_p = float(qs["min_params"][0]) if "min_params" in qs else None
                 max_p = float(qs["max_params"][0]) if "max_params" in qs else None

@@ -46,6 +46,14 @@ class TestWebServer(unittest.TestCase):
         self.assertTrue(len(claude_models) >= 3)
         self.assertTrue(all("claude" in m["model_id"].lower() for m in claude_models))
 
+        # Filter by hide_proprietary
+        res_np = self.client.get("/api/models?hide_proprietary=true")
+        self.assertEqual(res_np.status_code, 200)
+        open_models = res_np.json()
+        self.assertEqual(len(open_models), 1405)
+        self.assertTrue(all(m.get("license") != "proprietary" for m in open_models))
+        self.assertTrue(all(m.get("params_b") is not None for m in open_models))
+
     def test_03_get_model_detail(self):
         res = self.client.get("/api/models/openai/o1")
         self.assertEqual(res.status_code, 200)

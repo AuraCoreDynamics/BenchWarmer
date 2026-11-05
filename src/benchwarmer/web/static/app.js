@@ -239,8 +239,11 @@
     pageSize: 50,
     orgFilter: "",
     licenseFilter: "",
+    hideProprietary: false,
     contextTargetId: null
   };
+
+  const FRONTIER_KEYS = ["swe_bench_verified", "swe_bench_pro", "cybergym", "hle_tools", "aime_2024", "codeforces_elo"];
 
   // --- View Preset Columns ---
   const VIEW_PRESETS = {
@@ -254,6 +257,20 @@
       { key: "vram", label: "VRAM (Selected)", sortable: true },
       { key: "architecture", label: "Architecture", sortable: true },
       { key: "license", label: "License", sortable: true }
+    ],
+    frontier: [
+      { key: "select", label: "", sortable: false },
+      { key: "model_id", label: "Model", sortable: true },
+      { key: "org", label: "Org", sortable: true },
+      { key: "params_b", label: "Params", sortable: true },
+      { key: "swe_bench_verified", label: "SWE-bench Ver.", sortable: true },
+      { key: "swe_bench_pro", label: "SWE-bench Pro", sortable: true },
+      { key: "cybergym", label: "CyberGym", sortable: true },
+      { key: "hle_tools", label: "HLE Tools", sortable: true },
+      { key: "aime_2024", label: "AIME 2024", sortable: true },
+      { key: "codeforces_elo", label: "Codeforces", sortable: true },
+      { key: "arena_elo_raw", label: "Arena Elo", sortable: true },
+      { key: "hf_v2_avg", label: "HF v2 Avg", sortable: true }
     ],
     all: [
       { key: "select", label: "", sortable: false },
@@ -415,6 +432,7 @@
     const orgText = document.getElementById("active-org-text");
     const licChip = document.getElementById("active-license-chip");
     const licText = document.getElementById("active-license-text");
+    const propChip = document.getElementById("active-prop-chip");
 
     let hasActive = false;
 
@@ -434,6 +452,13 @@
       if (licChip) licChip.style.display = "none";
     }
 
+    if (state.hideProprietary) {
+      hasActive = true;
+      if (propChip) propChip.style.display = "inline-flex";
+    } else {
+      if (propChip) propChip.style.display = "none";
+    }
+
     if (container) {
       container.style.display = hasActive ? "flex" : "none";
     }
@@ -446,6 +471,10 @@
     const licSel = document.getElementById("license-filter-select");
     if (licSel && licSel.value !== state.licenseFilter) {
       licSel.value = state.licenseFilter;
+    }
+    const propToggle = document.getElementById("toggle-hide-proprietary");
+    if (propToggle && propToggle.checked !== state.hideProprietary) {
+      propToggle.checked = state.hideProprietary;
     }
   }
 
@@ -473,15 +502,31 @@
     renderTable();
   }
 
+  function clearProprietaryFilter() {
+    state.hideProprietary = false;
+    const propToggle = document.getElementById("toggle-hide-proprietary");
+    if (propToggle) propToggle.checked = false;
+    state.currentPage = 1;
+    renderTable();
+  }
+
 
   // --- Filtering & Sorting ---
   function getFilteredModels() {
     const beatRef = state.beatModelId ? state.models.find(m => m.model_id === state.beatModelId) : null;
 
     return state.models.filter(m => {
-      // 0. Provider and License filters
+      // 0a. Provider and License filters
       if (state.orgFilter && m.org.toLowerCase() !== state.orgFilter.toLowerCase()) return false;
       if (state.licenseFilter && (m.license || "").toLowerCase() !== state.licenseFilter.toLowerCase()) return false;
+
+      // 0b. Hide Proprietary filter (Open-Weights Only)
+      if (state.hideProprietary) {
+        const isProprietary = (m.license && m.license.toLowerCase() === "proprietary") ||
+                              (m.architecture && m.architecture.toLowerCase() === "proprietary") ||
+                              m.params_b === null;
+        if (isProprietary) return false;
+      }
 
       // 1. Parameter range filter
       if (state.minParams !== null && (m.params_b === null || m.params_b < state.minParams)) return false;
@@ -594,6 +639,13 @@
       } else if (["ifeval", "bbh", "math_hard", "gpqa", "musr", "mmlu_pro"].includes(key)) {
         va = a.scores ? a.scores[key] : null;
         vb = b.scores ? b.scores[key] : null;
+      } else if (FRONTIER_KEYS.includes(key)) {
+        va = (a.distinctive_benchmarks && a.distinctive_benchmarks[key] !== undefined)
+          ? a.distinctive_benchmarks[key]
+          : (a.scores ? a.scores[key] : null);
+        vb = (b.distinctive_benchmarks && b.distinctive_benchmarks[key] !== undefined)
+          ? b.distinctive_benchmarks[key]
+          : (b.scores ? b.scores[key] : null);
       } else {
         va = a[key];
         vb = b[key];
@@ -694,7 +746,7 @@
     // Update match count & pagination display
     const matchCountEl = document.getElementById("match-count");
     if (matchCountEl) {
-      matchCountEl.textContent = `${totalCount} of ${state.models.length} models displayed`;
+      matchCountEl.textContent = `${totalCount.toLocaleString()} of ${state.models.length.toLocaleString()} models displayed`;
     }
 
     const pagInfo = document.getElementById("pagination-info");
@@ -777,6 +829,18 @@
           const info = BENCHMARK_INFO[col.key] || { name: col.key, full_name: col.key, description: "" };
           const tooltip = `${info.full_name}&#10;${info.description}&#10;Score: ${val !== null && val !== undefined ? val.toFixed(1) : "N/A"}`;
           rowsHtml += `<td title="${tooltip}"><span class="score-num">${val !== null && val !== undefined ? val.toFixed(1) : "-"}</span></td>`;
+        } else if (FRONTIER_KEYS.includes(col.key)) {
+          const val = (m.distinctive_benchmarks && m.distinctive_benchmarks[col.key] !== undefined)
+            ? m.distinctive_benchmarks[col.key]
+            : (m.scores ? m.scores[col.key] : null);
+          const info = BENCHMARK_INFO[col.key] || { name: col.key, full_name: col.key, description: "" };
+          const tooltip = `${info.full_name}&#10;${info.description}&#10;Score: ${val !== null && val !== undefined ? (col.key === 'codeforces_elo' ? val.toFixed(0) : val.toFixed(1)) : "N/A"}`;
+          if (val !== null && val !== undefined) {
+            const formatted = col.key === "codeforces_elo" ? val.toFixed(0) : val.toFixed(1);
+            rowsHtml += `<td title="${tooltip}"><span class="score-num" style="color: var(--accent-cyan); font-weight: 600;">${formatted}</span></td>`;
+          } else {
+            rowsHtml += `<td title="${tooltip}"><span class="text-secondary">-</span></td>`;
+          }
         } else if (col.key === "context_length") {
           const ctxDisp = m.context_length ? `${(m.context_length / 1000).toFixed(0)}k` : "N/A";
           rowsHtml += `<td><span class="badge">${ctxDisp}</span></td>`;
@@ -1285,7 +1349,10 @@
         if (state.activeView === "scorer") {
           state.sortKey = "custom_score";
           state.sortAsc = false;
-        } else if (state.sortKey === "custom_score") {
+        } else if (state.activeView === "frontier") {
+          state.sortKey = "swe_bench_verified";
+          state.sortAsc = false;
+        } else if (state.sortKey === "custom_score" || state.sortKey === "swe_bench_verified") {
           state.sortKey = "hf_v2_avg";
           state.sortAsc = false;
         }
@@ -1341,6 +1408,7 @@
       state.beatModelId = null;
       state.orgFilter = "";
       state.licenseFilter = "";
+      state.hideProprietary = false;
       state.currentPage = 1;
       Object.keys(state.benchmarkThresholds).forEach(k => {
         state.benchmarkThresholds[k] = null;
@@ -1358,6 +1426,8 @@
       if (orgSel) orgSel.value = "";
       const licSel = document.getElementById("license-filter-select");
       if (licSel) licSel.value = "";
+      const toggleProp = document.getElementById("toggle-hide-proprietary");
+      if (toggleProp) toggleProp.checked = false;
 
       ["ifeval", "math", "gpqa", "bbh", "mmlu", "musr", "elo"].forEach(k => {
         const inp = document.getElementById(`min-${k}`);
@@ -1383,6 +1453,23 @@
         state.licenseFilter = e.target.value;
         state.currentPage = 1;
         renderTable();
+      };
+    }
+
+    const toggleProp = document.getElementById("toggle-hide-proprietary");
+    if (toggleProp) {
+      toggleProp.onchange = (e) => {
+        state.hideProprietary = e.target.checked;
+        state.currentPage = 1;
+        renderTable();
+      };
+    }
+
+    const btnClearPropChip = document.getElementById("btn-clear-prop-chip");
+    if (btnClearPropChip) {
+      btnClearPropChip.onclick = (e) => {
+        e.stopPropagation();
+        clearProprietaryFilter();
       };
     }
 

@@ -834,6 +834,8 @@ class BenchWarmer:
                 "mmlu_pro": float(row["mmlu_pro"]) if row["mmlu_pro"] is not None else None,
                 "arena_elo": float(row["arena_elo_norm"]) if row["arena_elo_norm"] is not None else None,
             }
+            for d_bench, d_val in distinctive_map.get(row["model_id"], {}).items():
+                scores[d_bench] = d_val
 
             models_list.append(
                 {

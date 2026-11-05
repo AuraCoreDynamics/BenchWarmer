@@ -430,6 +430,64 @@ class TestSeleniumUI(unittest.TestCase):
         driver.save_screenshot(str(shot_path))
         self.assertTrue(shot_path.exists())
 
+    def test_10_frontier_agentic_tab_and_hide_proprietary_toggle(self):
+        driver = self.driver
+        # 1. Close advanced filter panel if open
+        adv_panel = driver.find_element(self.By.ID, "advanced-filters-panel")
+        if adv_panel.is_displayed():
+            driver.find_element(self.By.ID, "btn-toggle-adv-filter").click()
+            time.sleep(0.3)
+
+        # 2. Reset filters to start clean
+        driver.find_element(self.By.ID, "btn-reset-filters").click()
+        time.sleep(0.4)
+
+        # 3. Switch to Frontier & Agentic view
+        tab_frontier = driver.find_element(self.By.CSS_SELECTOR, '.tab-btn[data-view="frontier"]')
+        self.assertIsNotNone(tab_frontier)
+        tab_frontier.click()
+        time.sleep(0.5)
+
+        # Verify headers in frontier tab
+        headers = [th.text for th in driver.find_elements(self.By.CSS_SELECTOR, "#table-head th")]
+        self.assertTrue(any("SWE-BENCH" in h.upper() for h in headers))
+        self.assertTrue(any("CYBERGYM" in h.upper() for h in headers))
+        self.assertTrue(any("HLE" in h.upper() for h in headers))
+        self.assertTrue(any("AIME" in h.upper() for h in headers))
+
+        # Take screenshot of Frontier & Agentic tab
+        shot_path_frontier = SCREENSHOTS_DIR / "10_frontier_agentic_leaderboard.png"
+        driver.save_screenshot(str(shot_path_frontier))
+        self.assertTrue(shot_path_frontier.exists())
+
+        # 4. Toggle "Hide Proprietary"
+        chk_prop = driver.find_element(self.By.ID, "toggle-hide-proprietary")
+        chk_prop.click()
+        time.sleep(0.5)
+
+        # Verify active chip is visible
+        prop_chip = driver.find_element(self.By.ID, "active-prop-chip")
+        self.assertTrue(prop_chip.is_displayed())
+        self.assertIn("Open Weights", prop_chip.text)
+
+        # Verify match count reflects filtered models (1,405)
+        match_count = driver.find_element(self.By.ID, "match-count").text
+        self.assertIn("1,405", match_count)
+
+        # Take screenshot of Open Weights Only view
+        shot_path_open = SCREENSHOTS_DIR / "11_open_weights_only_filter.png"
+        driver.save_screenshot(str(shot_path_open))
+        self.assertTrue(shot_path_open.exists())
+
+        # 5. Clear proprietary filter via chip close button
+        btn_clear_chip = driver.find_element(self.By.ID, "btn-clear-prop-chip")
+        btn_clear_chip.click()
+        time.sleep(0.4)
+
+        # Verify chip is hidden and full count restored
+        self.assertFalse(prop_chip.is_displayed())
+        self.assertIn("1,449", driver.find_element(self.By.ID, "match-count").text)
+
 
 if __name__ == "__main__":
     unittest.main()

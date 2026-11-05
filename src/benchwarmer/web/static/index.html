@@ -16,7 +16,7 @@
         <div class="brand-title">
           BenchWarmer
           <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
-          <span class="badge badge-green" id="badge-model-count">1,438 Models</span>
+          <span class="badge badge-green" id="badge-model-count">1,449 Models</span>
         </div>
         <div class="brand-subtitle" id="header-built-date">Current as of November 2026</div>
       </div>
@@ -35,6 +35,7 @@
     <!-- View Preset Switcher -->
     <div class="view-tabs">
       <button class="tab-btn active" data-view="leaderboard">🏆 Leaderboard</button>
+      <button class="tab-btn" data-view="frontier">🚀 Frontier & Agentic</button>
       <button class="tab-btn" data-view="all">📊 All Benchmarks</button>
       <button class="tab-btn" data-view="math">🧮 Math & Reasoning</button>
       <button class="tab-btn" data-view="code">💻 Coding & IFEval</button>
@@ -110,12 +111,17 @@
           </select>
         </label>
 
+        <label class="range-control checkbox-control" title="Hide proprietary API cloud models and show only open-weight models">
+          <input type="checkbox" id="toggle-hide-proprietary">
+          <span>Hide Proprietary</span>
+        </label>
+
         <button class="btn btn-sm" id="btn-toggle-adv-filter">🎯 Benchmark Filters</button>
       </div>
 
       <div class="toolbar-group">
         <button class="btn btn-sm" id="btn-reset-filters">Reset Filters</button>
-        <span class="text-secondary" style="font-size: 12px;" id="match-count">1,438 models displayed</span>
+        <span class="text-secondary" style="font-size: 12px;" id="match-count">1,449 models displayed</span>
       </div>
     </div>
 
@@ -129,6 +135,10 @@
       <span id="active-license-chip" class="filter-chip chip-license" style="display: none;">
         <span>License: <strong id="active-license-text"></strong></span>
         <button class="chip-close" id="btn-clear-license-chip" title="Clear license filter (or right-click license in table)">✕</button>
+      </span>
+      <span id="active-prop-chip" class="filter-chip chip-proprietary" style="display: none;">
+        <span>Open Weights Only</span>
+        <button class="chip-close" id="btn-clear-prop-chip" title="Show proprietary models">✕</button>
       </span>
     </div>
 

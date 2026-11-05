@@ -32,6 +32,100 @@ FRONTIER_BENCHMARKS = {
 MODELS_SEED_DATA = [
     # --- OpenAI Proprietary & Historical Models ---
     {
+        "model_id": "openai/gpt-5.6",
+        "org": "openai",
+        "model_name": "gpt-5.6",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 94.10, "bbh": 96.20, "math_hard": 97.50,
+            "gpqa": 93.80, "musr": 87.20, "mmlu_pro": 94.20, "arena_elo": 1440.0,
+            "swe_bench_verified": 93.20, "swe_bench_pro": 78.50, "cybergym": 84.00,
+            "hle_tools": 63.50, "aime_2024": 97.80, "codeforces_elo": 2810.0
+        }
+    },
+    {
+        "model_id": "openai/gpt-5.4",
+        "org": "openai",
+        "model_name": "gpt-5.4",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 92.80, "bbh": 95.00, "math_hard": 96.20,
+            "gpqa": 91.50, "musr": 83.50, "mmlu_pro": 92.60, "arena_elo": 1422.0,
+            "swe_bench_verified": 90.40, "swe_bench_pro": 73.80, "cybergym": 79.50,
+            "hle_tools": 59.20, "aime_2024": 95.50, "codeforces_elo": 2650.0
+        }
+    },
+    {
+        "model_id": "openai/gpt-5.2",
+        "org": "openai",
+        "model_name": "gpt-5.2",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 250000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 91.50, "bbh": 93.80, "math_hard": 94.50,
+            "gpqa": 88.80, "musr": 79.50, "mmlu_pro": 91.00, "arena_elo": 1402.0,
+            "swe_bench_verified": 87.10, "swe_bench_pro": 69.00,
+            "hle_tools": 54.00, "aime_2024": 93.20
+        }
+    },
+    {
+        "model_id": "openai/gpt-5",
+        "org": "openai",
+        "model_name": "gpt-5",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 250000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 90.60, "bbh": 93.00, "math_hard": 93.00,
+            "gpqa": 86.50, "musr": 77.00, "mmlu_pro": 89.80, "arena_elo": 1388.0,
+            "swe_bench_verified": 84.50, "swe_bench_pro": 65.50,
+            "hle_tools": 50.80, "aime_2024": 91.00
+        }
+    },
+    {
+        "model_id": "openai/gpt-5-mini",
+        "org": "openai",
+        "model_name": "gpt-5-mini",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 200000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 87.80, "bbh": 90.00, "math_hard": 89.00,
+            "gpqa": 79.00, "musr": 71.50, "mmlu_pro": 85.20, "arena_elo": 1345.0,
+            "swe_bench_verified": 75.00, "aime_2024": 85.50
+        }
+    },
+    {
         "model_id": "openai/o4",
         "org": "openai",
         "model_name": "o4",
@@ -344,6 +438,44 @@ MODELS_SEED_DATA = [
 
     # --- Anthropic Claude Models ---
     {
+        "model_id": "anthropic/claude-4-opus",
+        "org": "anthropic",
+        "model_name": "claude-4-opus",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 93.50, "bbh": 95.50, "math_hard": 96.00,
+            "gpqa": 93.00, "musr": 87.00, "mmlu_pro": 93.50, "arena_elo": 1430.0,
+            "swe_bench_verified": 92.00, "swe_bench_pro": 78.00, "cybergym": 82.50,
+            "hle_tools": 62.00
+        }
+    },
+    {
+        "model_id": "anthropic/claude-4-sonnet",
+        "org": "anthropic",
+        "model_name": "claude-4-sonnet",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 92.20, "bbh": 94.20, "math_hard": 94.50,
+            "gpqa": 89.50, "musr": 81.50, "mmlu_pro": 91.20, "arena_elo": 1410.0,
+            "swe_bench_verified": 87.50, "swe_bench_pro": 70.00,
+            "hle_tools": 55.00
+        }
+    },
+    {
         "model_id": "anthropic/claude-mythos-preview",
         "org": "anthropic",
         "model_name": "claude-mythos-preview",
@@ -468,6 +600,43 @@ MODELS_SEED_DATA = [
     },
 
     # --- Google Gemini & Gemma Models ---
+    {
+        "model_id": "google/gemini-3.0-pro",
+        "org": "google",
+        "model_name": "gemini-3.0-pro",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 2000000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 92.00, "bbh": 94.50, "math_hard": 94.80,
+            "gpqa": 90.20, "musr": 82.00, "mmlu_pro": 91.80, "arena_elo": 1415.0,
+            "swe_bench_verified": 88.20, "swe_bench_pro": 71.00,
+            "hle_tools": 57.50, "aime_2024": 94.00
+        }
+    },
+    {
+        "model_id": "google/gemini-3.0-flash",
+        "org": "google",
+        "model_name": "gemini-3.0-flash",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 1000000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 88.50, "bbh": 91.20, "math_hard": 88.50,
+            "gpqa": 80.50, "musr": 74.00, "mmlu_pro": 86.00, "arena_elo": 1360.0,
+            "swe_bench_verified": 76.50, "aime_2024": 86.20
+        }
+    },
     {
         "model_id": "google/gemini-2.5-pro",
         "org": "google",
@@ -1039,6 +1208,40 @@ MODELS_SEED_DATA = [
     },
 
     # --- Meta Llama 3.3, 3.2, 3.1, & 2 Models ---
+    {
+        "model_id": "meta-llama/Llama-3.4-70B-Instruct",
+        "org": "meta-llama",
+        "model_name": "Llama-3.4-70B-Instruct",
+        "base_model": "meta-llama/Llama-3.4-70B",
+        "params_b": 70.60,
+        "active_params_b": 70.60,
+        "context_length": 131072,
+        "architecture": "LlamaForCausalLM",
+        "license": "llama3.3",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 89.50, "bbh": 90.20, "math_hard": 78.40,
+            "gpqa": 64.50, "musr": 62.00, "mmlu_pro": 82.50, "arena_elo": 1342.0
+        }
+    },
+    {
+        "model_id": "meta-llama/Llama-3.3-405B-Instruct",
+        "org": "meta-llama",
+        "model_name": "Llama-3.3-405B-Instruct",
+        "base_model": "meta-llama/Llama-3.3-405B",
+        "params_b": 405.0,
+        "active_params_b": 405.0,
+        "context_length": 131072,
+        "architecture": "LlamaForCausalLM",
+        "license": "llama3.3",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 91.00, "bbh": 92.50, "math_hard": 82.50,
+            "gpqa": 68.20, "musr": 64.00, "mmlu_pro": 85.50, "arena_elo": 1378.0
+        }
+    },
     {
         "model_id": "meta-llama/Llama-3.1-405B-Instruct",
         "org": "meta-llama",

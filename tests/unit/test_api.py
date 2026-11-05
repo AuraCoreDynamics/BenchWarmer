@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "1438")
+        self.assertEqual(meta.get("model_count"), "1449")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -190,13 +190,13 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 1438)
+        self.assertEqual(len(all_audits), 1449)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 1438)
+        self.assertEqual(len(detailed), 1449)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
 
@@ -217,6 +217,19 @@ class TestBenchWarmerAPI(unittest.TestCase):
         self.assertEqual(o3.distinctive_benchmarks["swe_bench_verified"], 84.80)
         self.assertEqual(o3.distinctive_benchmarks["codeforces_elo"], 2727.0)
         self.assertEqual(o3.distinctive_benchmarks["aime_2024"], 96.70)
+
+        gpt56 = self.bw.get_model("openai/gpt-5.6")
+        self.assertIsNotNone(gpt56)
+        self.assertEqual(gpt56.org, "openai")
+        self.assertEqual(gpt56.raw_scores["arena_elo"], 1440.0)
+        self.assertEqual(gpt56.distinctive_benchmarks["swe_bench_verified"], 93.20)
+        self.assertEqual(gpt56.distinctive_benchmarks["aime_2024"], 97.80)
+
+        gpt54 = self.bw.get_model("openai/gpt-5.4")
+        self.assertIsNotNone(gpt54)
+        self.assertEqual(gpt54.org, "openai")
+        self.assertEqual(gpt54.raw_scores["arena_elo"], 1422.0)
+        self.assertEqual(gpt54.distinctive_benchmarks["swe_bench_verified"], 90.40)
 
         fable = self.bw.get_model("anthropic/claude-fable")
         self.assertIsNotNone(fable)

@@ -103,7 +103,7 @@ class TestSeleniumUI(unittest.TestCase):
         self.assertIn("BenchWarmer", driver.title)
 
         badge = driver.find_element(self.By.ID, "badge-model-count").text
-        self.assertIn("1,438", badge)
+        self.assertIn("1,449", badge)
 
         rows = driver.find_elements(self.By.CSS_SELECTOR, "#table-body tr")
         self.assertEqual(len(rows), 50)

@@ -41,7 +41,7 @@ The AuraSeed lifecycle packages BenchWarmer into a portable installer bundle con
 flowchart TD
     subgraph Development [BenchWarmer Repository]
         Src["src/benchwarmer (Core Oracle & Web GUI)"]
-        DB["src/.../benchmarks.db (1,438 Models)"]
+        DB["src/.../benchmarks.db (1,449 Models)"]
         AppMeta["app.json (Application Metadata)"]
         Hook["hooks/post_install.py (Asset & Web Seeding)"]
     end
@@ -129,7 +129,7 @@ python -m auraseed package-app C:\dev\benchwarmer --out C:\dev\benchwarmer_dist
 ```
 
 This generates `C:\dev\benchwarmer_dist` containing:
-- `payload/`: The complete BenchWarmer package, embedded benchmarks SQLite database (1,438 models), web assets, and CLI entry points.
+- `payload/`: The complete BenchWarmer package, embedded benchmarks SQLite database (1,449 models), web assets, and CLI entry points.
 - `hooks/post_install.py`: Standalone execution hook ensuring runtime assets and dependencies are provisioned.
 - `install.bat`, `install.ps1`, `install.sh`: Native OS installer scripts.
 - `auraseed/`: Embedded bootstrap runtime for host systems where AuraSeed is not yet installed.
@@ -188,7 +188,7 @@ In restricted or air-gapped enterprise environments:
 
 - **No PyPI Connection Required**: The distribution bundle contains all necessary code and data assets.
 - **No Global Python Footprint**: Does not modify system-wide Python environments, Anaconda bases, or ArcGIS/QGIS embedded Python installations.
-- **Read-Only SQLite Invariance**: The 1,438 model benchmark database (`benchmarks.db`) is embedded and opened read-only, preventing runtime state corruption.
+- **Read-Only SQLite Invariance**: The 1,449 model benchmark database (`benchmarks.db`) is embedded and opened read-only, preventing runtime state corruption.
 - **Sovereign Isolation**: Applications deployed via AuraSeed maintain their own sovereign virtual environment (`~/.auraseed/apps/benchwarmer/`), isolated from user packages.
 
 ---

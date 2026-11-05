@@ -27,17 +27,18 @@ class TestWebServer(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertIn("version", data)
-        self.assertEqual(data.get("model_count"), "1465")
+        self.assertEqual(data.get("model_count"), "1489")
 
     def test_02_get_all_models_and_filter(self):
         res = self.client.get("/api/models")
         self.assertEqual(res.status_code, 200)
         models = res.json()
-        self.assertEqual(len(models), 1465)
+        self.assertEqual(len(models), 1489)
         first = models[0]
         self.assertIn("model_id", first)
         self.assertIn("estimated_vram_gb", first)
         self.assertIn("scores", first)
+        self.assertIn("domain_scores", first)
 
         # Filter by query
         res_q = self.client.get("/api/models?query=claude")
@@ -50,9 +51,16 @@ class TestWebServer(unittest.TestCase):
         res_np = self.client.get("/api/models?hide_proprietary=true")
         self.assertEqual(res_np.status_code, 200)
         open_models = res_np.json()
-        self.assertEqual(len(open_models), 1418)
+        self.assertEqual(len(open_models), 1436)
         self.assertTrue(all(m.get("license") != "proprietary" for m in open_models))
         self.assertTrue(all(m.get("params_b") is not None for m in open_models))
+
+        # Filter by domain
+        res_dom = self.client.get("/api/models?domain=coding")
+        self.assertEqual(res_dom.status_code, 200)
+        coding_models = res_dom.json()
+        self.assertTrue(len(coding_models) > 0)
+        self.assertTrue(all(m.get("primary_domain_key") == "coding" or m.get("domain_scores", {}).get("coding", 0.0) >= 60.0 for m in coding_models))
 
     def test_03_get_model_detail(self):
         res = self.client.get("/api/models/openai/o1")
@@ -92,7 +100,7 @@ class TestWebServer(unittest.TestCase):
         res_all = self.client.get("/api/audit")
         self.assertEqual(res_all.status_code, 200)
         audits = res_all.json()
-        self.assertEqual(len(audits), 1465)
+        self.assertEqual(len(audits), 1489)
         self.assertEqual(audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         res_single = self.client.get("/api/audit/overfit-ai/Goodhart-Overfit-7B")

@@ -16,6 +16,11 @@ from benchwarmer.contracts import (
     ContaminationReport,
 )
 from benchwarmer.db.connector import SQLiteConnector
+from benchwarmer.domains import (
+    DOMAINS,
+    compute_domain_scores,
+    determine_primary_domain,
+)
 
 
 def _sanitize_fts_query(query: str) -> str:
@@ -178,6 +183,23 @@ class BenchWarmer:
             else:
                 estimated_vram_gb[quant_key] = 0.0
 
+        domain_scores = compute_domain_scores(
+            scores=scores,
+            raw_scores=raw_scores,
+            params_b=params_b,
+            context_length=m_row["context_length"],
+            license_str=m_row["license"],
+            architecture=m_row["architecture"],
+            model_id=m_row["model_id"],
+        )
+        primary_domain, primary_key, domain_tags = determine_primary_domain(
+            domain_scores=domain_scores,
+            model_id=m_row["model_id"],
+            params_b=params_b,
+            architecture=m_row["architecture"],
+            license_str=m_row["license"],
+        )
+
         record = ModelRecord(
             model_id=m_row["model_id"],
             org=m_row["org"],
@@ -194,6 +216,10 @@ class BenchWarmer:
             raw_scores=raw_scores,
             estimated_vram_gb=estimated_vram_gb,
             distinctive_benchmarks=distinctive_benchmarks,
+            domain_scores=domain_scores,
+            primary_domain=primary_domain,
+            primary_domain_key=primary_key,
+            domain_tags=domain_tags,
         )
         self._model_cache[resolved] = record
         return record
@@ -837,6 +863,23 @@ class BenchWarmer:
             for d_bench, d_val in distinctive_map.get(row["model_id"], {}).items():
                 scores[d_bench] = d_val
 
+            domain_scores = compute_domain_scores(
+                scores=scores,
+                raw_scores={"arena_elo": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None},
+                params_b=params_b,
+                context_length=row["context_length"],
+                license_str=row["license"],
+                architecture=row["architecture"],
+                model_id=row["model_id"],
+            )
+            primary_domain, primary_key, domain_tags = determine_primary_domain(
+                domain_scores=domain_scores,
+                model_id=row["model_id"],
+                params_b=params_b,
+                architecture=row["architecture"],
+                license_str=row["license"],
+            )
+
             models_list.append(
                 {
                     "model_id": row["model_id"],
@@ -856,6 +899,10 @@ class BenchWarmer:
                         "arena_elo": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
                     },
                     "distinctive_benchmarks": distinctive_map.get(row["model_id"], {}),
+                    "domain_scores": domain_scores,
+                    "primary_domain": primary_domain,
+                    "primary_domain_key": primary_key,
+                    "domain_tags": domain_tags,
                     "hf_v2_avg": float(row["hf_v2_avg"]) if row["hf_v2_avg"] is not None else None,
                     "arena_elo_raw": float(row["arena_elo_raw"]) if row["arena_elo_raw"] is not None else None,
                 }

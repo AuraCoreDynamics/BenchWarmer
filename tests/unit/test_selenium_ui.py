@@ -103,7 +103,7 @@ class TestSeleniumUI(unittest.TestCase):
         self.assertIn("BenchWarmer", driver.title)
 
         badge = driver.find_element(self.By.ID, "badge-model-count").text
-        self.assertIn("1,465", badge)
+        self.assertIn("1,489", badge)
 
         rows = driver.find_elements(self.By.CSS_SELECTOR, "#table-body tr")
         self.assertEqual(len(rows), 50)
@@ -470,9 +470,9 @@ class TestSeleniumUI(unittest.TestCase):
         self.assertTrue(prop_chip.is_displayed())
         self.assertIn("Open Weights", prop_chip.text)
 
-        # Verify match count reflects filtered models (1,418)
+        # Verify match count reflects filtered models (1,436)
         match_count = driver.find_element(self.By.ID, "match-count").text
-        self.assertIn("1,418", match_count)
+        self.assertIn("1,436", match_count)
 
         # Take screenshot of Open Weights Only view
         shot_path_open = SCREENSHOTS_DIR / "11_open_weights_only_filter.png"
@@ -486,7 +486,23 @@ class TestSeleniumUI(unittest.TestCase):
 
         # Verify chip is hidden and full count restored
         self.assertFalse(prop_chip.is_displayed())
-        self.assertIn("1,465", driver.find_element(self.By.ID, "match-count").text)
+        self.assertIn("1,489", driver.find_element(self.By.ID, "match-count").text)
+
+        # 6. Test Domain Specialization Filter
+        from selenium.webdriver.support.ui import Select
+        dom_select = Select(driver.find_element(self.By.ID, "domain-filter-select"))
+        dom_select.select_by_value("analytics")
+        time.sleep(0.5)
+
+        dom_chip = driver.find_element(self.By.ID, "active-domain-chip")
+        self.assertTrue(dom_chip.is_displayed())
+        self.assertIn("Analytics", dom_chip.text)
+
+        btn_clear_dom = driver.find_element(self.By.ID, "btn-clear-domain-chip")
+        btn_clear_dom.click()
+        time.sleep(0.4)
+        self.assertFalse(dom_chip.is_displayed())
+        self.assertIn("1,489", driver.find_element(self.By.ID, "match-count").text)
 
 
 if __name__ == "__main__":

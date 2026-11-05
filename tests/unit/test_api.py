@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "1465")
+        self.assertEqual(meta.get("model_count"), "1489")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -190,15 +190,17 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 1465)
+        self.assertEqual(len(all_audits), 1489)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 1465)
+        self.assertEqual(len(detailed), 1489)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
+        self.assertIn("domain_scores", detailed[0])
+        self.assertIn("primary_domain", detailed[0])
 
     def test_12_mythos_and_frontier_models(self):
         mythos = self.bw.get_model("anthropic/claude-mythos-preview")
@@ -254,6 +256,55 @@ class TestBenchWarmerAPI(unittest.TestCase):
         self.assertIsNotNone(mythomax)
         self.assertEqual(mythomax.org, "Gryphe")
         self.assertEqual(mythomax.params_b, 13.0)
+
+    def test_13_domain_alignment_and_new_models(self):
+        # 1. Amazon Nova Pro
+        nova = self.bw.get_model("amazon/nova-pro-v1.0")
+        self.assertIsNotNone(nova)
+        self.assertEqual(nova.org, "amazon")
+        self.assertEqual(nova.context_length, 300000)
+        self.assertEqual(nova.distinctive_benchmarks["swe_bench_verified"], 45.80)
+        self.assertIn("domain_scores", nova.to_dict())
+        self.assertTrue(nova.domain_scores["analytics"] >= 70.0)
+        self.assertTrue(nova.domain_scores["office"] >= 75.0)
+
+        # 2. MiniMax-Text-01 (4M tokens)
+        minimax = self.bw.get_model("minimax/MiniMax-Text-01")
+        self.assertIsNotNone(minimax)
+        self.assertEqual(minimax.params_b, 456.0)
+        self.assertEqual(minimax.active_params_b, 45.9)
+        self.assertEqual(minimax.context_length, 4000000)
+        self.assertTrue(minimax.domain_scores["office"] >= 80.0)
+
+        # 3. AI21 Jamba 1.5 Large
+        jamba = self.bw.get_model("ai21labs/AI21-Jamba-1.5-Large")
+        self.assertIsNotNone(jamba)
+        self.assertEqual(jamba.architecture, "JambaForCausalLM")
+        self.assertEqual(jamba.context_length, 256000)
+
+        # 4. Liquid AI LFM-40B-MoE
+        lfm = self.bw.get_model("liquid-ai/LFM-40B-MoE")
+        self.assertIsNotNone(lfm)
+        self.assertEqual(lfm.architecture, "LFMForCausalLM")
+
+        # 5. Apple OpenELM Edge Models
+        elm = self.bw.get_model("apple/OpenELM-3B-Instruct")
+        self.assertIsNotNone(elm)
+        self.assertEqual(elm.params_b, 3.04)
+        self.assertEqual(elm.primary_domain_key, "edge")
+        self.assertTrue(elm.domain_scores["edge"] >= 60.0)
+
+        # 6. Hermes 3 405B
+        hermes = self.bw.get_model("NousResearch/Hermes-3-Llama-3.1-405B")
+        self.assertIsNotNone(hermes)
+        self.assertEqual(hermes.params_b, 405.0)
+        self.assertEqual(hermes.distinctive_benchmarks["cybergym"], 62.00)
+
+        # 7. Codestral Mamba 7B
+        codestral_mamba = self.bw.get_model("mistralai/Codestral-Mamba-7B-v0.1")
+        self.assertIsNotNone(codestral_mamba)
+        self.assertEqual(codestral_mamba.primary_domain_key, "coding")
+        self.assertEqual(codestral_mamba.architecture, "Mamba2ForCausalLM")
 
 
 if __name__ == "__main__":

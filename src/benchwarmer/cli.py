@@ -106,6 +106,8 @@ def handle_info(bw: BenchWarmer, args: argparse.Namespace) -> int:
         ["License", rec.license or "N/A"],
         ["Precision", rec.precision or "N/A"],
         ["Is MoE", "Yes" if rec.is_moe else "No"],
+        ["Primary Specialization", rec.primary_domain or "General"],
+        ["Recommended Domains", ", ".join(rec.domain_tags) if rec.domain_tags else "General"],
     ]
     for b, s in sorted(rec.scores.items()):
         raw = rec.raw_scores.get(b, s)

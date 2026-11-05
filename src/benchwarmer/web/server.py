@@ -77,6 +77,7 @@ def create_fastapi_app(bw: Optional[BenchWarmer] = None, db_path: Optional[str] 
         min_params: Optional[float] = None,
         max_params: Optional[float] = None,
         hide_proprietary: Optional[bool] = False,
+        domain: Optional[str] = None,
     ):
         all_models = oracle.get_all_models_detailed()
         filtered = all_models
@@ -86,6 +87,13 @@ def create_fastapi_app(bw: Optional[BenchWarmer] = None, db_path: Optional[str] 
                 if (m.get("license") or "").lower() != "proprietary"
                 and (m.get("architecture") or "").lower() != "proprietary"
                 and m.get("params_b") is not None
+            ]
+        if domain and domain.strip() and domain.strip().lower() != "all":
+            d_key = domain.strip().lower()
+            filtered = [
+                m for m in filtered
+                if m.get("primary_domain_key") == d_key
+                or (m.get("domain_scores", {}).get(d_key, 0.0) >= 60.0)
             ]
         if min_params is not None:
             filtered = [m for m in filtered if m["params_b"] is not None and m["params_b"] >= min_params]
@@ -199,6 +207,14 @@ def _run_stdlib_fallback_server(bw: BenchWarmer, host: str, port: int) -> None:
                         if (m.get("license") or "").lower() != "proprietary"
                         and (m.get("architecture") or "").lower() != "proprietary"
                         and m.get("params_b") is not None
+                    ]
+                dom = qs.get("domain", [None])[0]
+                if dom and dom.strip() and dom.strip().lower() != "all":
+                    dk = dom.strip().lower()
+                    all_models = [
+                        m for m in all_models
+                        if m.get("primary_domain_key") == dk
+                        or (m.get("domain_scores", {}).get(dk, 0.0) >= 60.0)
                     ]
                 q = qs.get("query", [None])[0]
                 min_p = float(qs["min_params"][0]) if "min_params" in qs else None

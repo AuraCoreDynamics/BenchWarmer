@@ -31,7 +31,7 @@ class TestGUIHeadless(unittest.TestCase):
         try:
             # Unfiltered
             rows = controller.get_leaderboard_data()
-            self.assertEqual(len(rows), 1465)
+            self.assertEqual(len(rows), 1489)
             self.assertIn("model_id", rows[0])
             self.assertIn("hf_v2_avg_display", rows[0])
 

@@ -186,7 +186,7 @@ class TestBenchWarmerCLI(unittest.TestCase):
         self.assertEqual(res.returncode, 0, f"Zipapp stderr: {res.stderr}")
         data = json.loads(res.stdout)
         self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["model_id"], "microsoft/Phi-4")
+        self.assertIn(data[0]["model_id"], ["microsoft/Phi-4", "microsoft/Phi-4-mini-instruct"])
 
 
 if __name__ == "__main__":

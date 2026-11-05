@@ -52,6 +52,10 @@ class ModelRecord:
     raw_scores: Dict[str, float]        # benchmark -> raw score
     estimated_vram_gb: Dict[str, float] # quant_name -> estimated VRAM GB (weights + 15% overhead)
     distinctive_benchmarks: Dict[str, float] = field(default_factory=dict)
+    domain_scores: Dict[str, float] = field(default_factory=dict)
+    primary_domain: str = ""
+    primary_domain_key: str = ""
+    domain_tags: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

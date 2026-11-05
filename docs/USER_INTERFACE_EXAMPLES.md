@@ -24,7 +24,7 @@ All screenshots in this document are automatically captured directly from live b
 
 ## 1. Interactive Leaderboard & Real-Time Exploration
 
-The primary leaderboard provides instant visibility into 1,465 modern LLMs across 83 providers, built directly on top of the embedded SQLite datastore.
+The primary leaderboard provides instant visibility into 1,489 modern LLMs across 83 providers, built directly on top of the embedded SQLite datastore.
 
 ![Leaderboard Overview](screenshots/01_leaderboard_overview.png)
 
@@ -38,7 +38,7 @@ The primary leaderboard provides instant visibility into 1,465 modern LLMs acros
 
 ## 2. Provider & License Click-to-Filter System
 
-Navigating through 1,465 models is streamlined with instant click-to-filter tag interaction, context-menu clearing, and active filter chips.
+Navigating through 1,489 models is streamlined with instant click-to-filter tag interaction, context-menu clearing, and active filter chips.
 
 ![Provider & License Filtering](screenshots/02_provider_and_license_filtering.png)
 
@@ -180,13 +180,36 @@ For self-hosting, on-premise security, and sovereignty requirements (e.g. deploy
 ![Open Weights Only Filter](screenshots/11_open_weights_only_filter.png)
 
 ### Open-Weights Features:
-- **Instant Client-Side & API Filtering**: Excludes all 44 proprietary cloud endpoints (`license == "proprietary"` or `architecture == "Proprietary"`), displaying the 1,405 open-weight models across Meta, Qwen, Mistral, Nvidia, DeepSeek, and community releases.
+- **Instant Client-Side & API Filtering**: Excludes all 53 proprietary cloud endpoints (`license == "proprietary"` or `architecture == "Proprietary"`), displaying the 1,436 open-weight models across Meta, Qwen, Mistral, Nvidia, DeepSeek, and community releases.
 - **Active Filter Chip**: An amber **Open Weights Only** chip surfaces in the toolbar with a `✕` one-click restore button.
 - **Server API Support**: Supported via query parameter `GET /api/models?hide_proprietary=true` for headless scripting and pipeline integration.
 
 ---
 
-## 12. Automated Selenium Testing & Screenshot Pipeline
+## 12. Enterprise & Domain Alignment (Persona Specialization)
+
+Beyond academic evaluations, enterprise users need models tailored to their specific everyday professional responsibilities. BenchWarmer provides multi-tiered domain alignment across 8 critical workload specializations:
+
+| Domain Specialization | Target Personas | Key Workload Capabilities | Primary Evaluation Benchmarks |
+| :--- | :--- | :--- | :--- |
+| 💻 **Coding & DevOps** | Software Engineers, DevOps, Systems Architects | Issue resolution, bug triage, refactoring, systems scripting, test synthesis | SWE-bench Verified/Pro, Codeforces, LiveCodeBench, MATH Hard |
+| 📊 **Analytics & SQL** | Data Analysts, BI Engineers, Data Scientists | Text-to-SQL generation, tabular reasoning, pandas transformation, KPI modeling | MATH Hard, BBH algorithmic, IFEval structured formatting, HLE Tools |
+| 📈 **Finance & Quant** | Financial Analysts, Quants, Risk & Audit Officers | 10-K/10-Q synthesis, financial statement parsing, math accuracy, negative constraints | MATH Hard, AIME 2024, IFEval compliance, BBH table reasoning |
+| 💼 **Enterprise Office** | Knowledge Workers, Product Managers, Operations | Executive memos, meeting summaries, structured report generation, multi-turn chat | IFEval instruction following, Arena Elo conversational quality, MMLU-Pro |
+| ⚖️ **Legal & Compliance** | Legal Counsel, Compliance Officers, Risk Managers | Contract clause extraction, statutory analysis, zero-hallucination compliance | IFEval strict constraints, MuSR narrative reasoning, GPQA Diamond |
+| 🔬 **Math & Science** | Research Scientists, Mathematicians, Physicists | Multi-hop symbolic deduction, scientific problem-solving, theorem proofs | MATH Hard, GPQA Diamond, AIME 2024, BBH |
+| 🛡️ **Cybersecurity** | Security Engineers, AppSec Auditors, SOC Analysts | Vulnerability mitigation, CyberGym CTF, attack path modeling, secure code audit | CyberGym Autonomous CTF, SWE-bench Verified, BBH logic |
+| 📱 **Edge & On-Device** | Mobile Engineers, Edge AI, Offline Deployments | Local laptop/phone inference, low latency, sub-8B/sub-4B params, sub-8GB VRAM | Parameters <= 8B, Open Weights, IFEval compactness, Arena Elo |
+
+### Domain Alignment Features:
+- **Domain Specialization Dropdown**: Directly filter the catalog to models excelling in the selected domain.
+- **Scorecard Role Suitability Meters**: Visual capability bars and tier badges (🌟 Exceptional, 🟢 Strong, 🟡 Capable, ⚪ Baseline) for every persona.
+- **Custom Scorer Domain Presets**: Instant one-click presets for `📊 Analytics`, `📈 Finance`, `💼 Enterprise Office`, `🛡️ Cybersecurity`, and `💻 Coding`.
+- **Head-to-Head Domain Comparison**: Side-by-side domain capability matrix in the Multi-Model Compare modal.
+
+---
+
+## 13. Automated Selenium Testing & Screenshot Pipeline
 
 All user interface screenshots in this documentation are programmatically generated and verified via BenchWarmer's automated Selenium test harness.
 

@@ -32,6 +32,73 @@
     { key: "mmlu_pro", label: "MMLU-Pro" }
   ];
 
+  const DOMAINS = {
+    coding: {
+      key: "coding",
+      title: "Software Engineering & DevOps",
+      short: "Coding & DevOps",
+      icon: "💻",
+      personas: "Software Engineers, DevOps Architects, Systems Programmers",
+      desc: "SWE-bench Verified, code synthesis, bug refactoring, bash automation, and systems programming."
+    },
+    analytics: {
+      key: "analytics",
+      title: "Data Analytics & SQL",
+      short: "Analytics & SQL",
+      icon: "📊",
+      personas: "Data Analysts, BI Developers, Analytics Engineers",
+      desc: "Tabular reasoning, text-to-SQL generation, data transformations, and KPI analysis."
+    },
+    finance: {
+      key: "finance",
+      title: "Financial & Quantitative Analysis",
+      short: "Finance & Quant",
+      icon: "📈",
+      personas: "Financial Analysts, Quants, Risk & Audit Officers",
+      desc: "10-K/10-Q synthesis, numerical model reasoning, table parsing, and strict instruction following."
+    },
+    office: {
+      key: "office",
+      title: "Enterprise & Office Productivity",
+      short: "Enterprise Office",
+      icon: "💼",
+      personas: "Knowledge Workers, Product Managers, Operations Teams",
+      desc: "Executive memos, meeting summaries, structured report generation, and natural conversational chat."
+    },
+    legal: {
+      key: "legal",
+      title: "Legal, Regulatory & Compliance",
+      short: "Legal & Compliance",
+      icon: "⚖️",
+      personas: "Legal Counsel, Compliance Officers, Contract Managers",
+      desc: "Contract clause extraction, statutory analysis, negative constraint adherence, and policy verification."
+    },
+    math_science: {
+      key: "math_science",
+      title: "Math, Science & Advanced Reasoning",
+      short: "Math & Science",
+      icon: "🔬",
+      personas: "Research Scientists, Mathematicians, Applied Physicists",
+      desc: "Symbolic deduction, GPQA Diamond science, AIME olympiad math, and multi-hop theorem reasoning."
+    },
+    cybersecurity: {
+      key: "cybersecurity",
+      title: "Cybersecurity & AppSec",
+      short: "Cybersecurity",
+      icon: "🛡️",
+      personas: "Security Engineers, AppSec Auditors, SOC Analysts",
+      desc: "CyberGym exploit mitigation, vulnerability triage, attack path modeling, and secure code review."
+    },
+    edge: {
+      key: "edge",
+      title: "Edge & On-Device Deployment",
+      short: "Edge & On-Device",
+      icon: "📱",
+      personas: "Mobile Engineers, Edge AI Developers, Offline Privacy",
+      desc: "Local inference on laptops & mobile (Apple Silicon / RTX), low VRAM footprint (<8GB/16GB), low latency."
+    }
+  };
+
   const BENCHMARK_INFO = {
     ifeval: {
       name: "IFEval",
@@ -172,6 +239,11 @@
       name: "License",
       full_name: "Weights & Usage License",
       description: "Distribution license governing model weights, fine-tuning, and commercial deployment. Click to filter, right-click to clear."
+    },
+    primary_domain: {
+      name: "Specialization",
+      full_name: "Primary Domain Specialization",
+      description: "Primary enterprise or developer workload where this model demonstrates high competence (Coding, Analytics, Finance, Office, Legal, Cyber, Edge)."
     }
   };
 
@@ -240,6 +312,7 @@
     orgFilter: "",
     licenseFilter: "",
     hideProprietary: false,
+    filterDomain: "",
     contextTargetId: null
   };
 
@@ -433,6 +506,8 @@
     const licChip = document.getElementById("active-license-chip");
     const licText = document.getElementById("active-license-text");
     const propChip = document.getElementById("active-prop-chip");
+    const domChip = document.getElementById("active-domain-chip");
+    const domText = document.getElementById("active-domain-text");
 
     let hasActive = false;
 
@@ -459,6 +534,15 @@
       if (propChip) propChip.style.display = "none";
     }
 
+    if (state.filterDomain && state.filterDomain !== "all") {
+      hasActive = true;
+      const dMeta = DOMAINS[state.filterDomain] || { short: state.filterDomain, icon: "🎯" };
+      if (domText) domText.textContent = `${dMeta.icon} ${dMeta.short}`;
+      if (domChip) domChip.style.display = "inline-flex";
+    } else {
+      if (domChip) domChip.style.display = "none";
+    }
+
     if (container) {
       container.style.display = hasActive ? "flex" : "none";
     }
@@ -471,6 +555,10 @@
     const licSel = document.getElementById("license-filter-select");
     if (licSel && licSel.value !== state.licenseFilter) {
       licSel.value = state.licenseFilter;
+    }
+    const domSel = document.getElementById("domain-filter-select");
+    if (domSel && domSel.value !== state.filterDomain) {
+      domSel.value = state.filterDomain;
     }
     const propToggle = document.getElementById("toggle-hide-proprietary");
     if (propToggle && propToggle.checked !== state.hideProprietary) {
@@ -510,6 +598,14 @@
     renderTable();
   }
 
+  function clearDomainFilter() {
+    state.filterDomain = "";
+    const domSel = document.getElementById("domain-filter-select");
+    if (domSel) domSel.value = "";
+    state.currentPage = 1;
+    renderTable();
+  }
+
 
   // --- Filtering & Sorting ---
   function getFilteredModels() {
@@ -526,6 +622,14 @@
           (m.architecture && m.architecture.toLowerCase() === "proprietary") ||
           m.params_b === null;
         if (isProprietary) return false;
+      }
+
+      // 0c. Domain Specialization filter
+      if (state.filterDomain && state.filterDomain !== "all") {
+        const dKey = state.filterDomain.toLowerCase();
+        const matchesPrimary = m.primary_domain_key === dKey;
+        const matchesScore = m.domain_scores && m.domain_scores[dKey] >= 60.0;
+        if (!matchesPrimary && !matchesScore) return false;
       }
 
       // 1. Parameter range filter
@@ -545,7 +649,9 @@
         const matchesOrg = m.org.toLowerCase().includes(q);
         const matchesName = m.model_name.toLowerCase().includes(q);
         const matchesArch = m.architecture && m.architecture.toLowerCase().includes(q);
-        if (!matchesId && !matchesOrg && !matchesName && !matchesArch) return false;
+        const matchesDomain = (m.primary_domain && m.primary_domain.toLowerCase().includes(q)) ||
+          (m.domain_tags && m.domain_tags.some(t => t.toLowerCase().includes(q)));
+        if (!matchesId && !matchesOrg && !matchesName && !matchesArch && !matchesDomain) return false;
       }
 
       // 4. Benchmark minimum score thresholds
@@ -631,8 +737,17 @@
         va = a.estimated_vram_gb ? a.estimated_vram_gb[state.currentQuant] : null;
         vb = b.estimated_vram_gb ? b.estimated_vram_gb[state.currentQuant] : null;
       } else if (key === "hf_v2_avg") {
-        va = a.hf_v2_avg;
-        vb = b.hf_v2_avg;
+        if (state.filterDomain && state.filterDomain !== "all") {
+          va = (a.domain_scores && a.domain_scores[state.filterDomain] !== undefined) ? a.domain_scores[state.filterDomain] : a.hf_v2_avg;
+          vb = (b.domain_scores && b.domain_scores[state.filterDomain] !== undefined) ? b.domain_scores[state.filterDomain] : b.hf_v2_avg;
+        } else {
+          va = a.hf_v2_avg;
+          vb = b.hf_v2_avg;
+        }
+      } else if (key === "primary_domain") {
+        va = a.primary_domain || "";
+        vb = b.primary_domain || "";
+        return asc ? va.localeCompare(vb) : vb.localeCompare(va);
       } else if (key === "arena_elo_raw") {
         va = a.raw_scores ? a.raw_scores.arena_elo : null;
         vb = b.raw_scores ? b.raw_scores.arena_elo : null;
@@ -788,7 +903,11 @@
           rowsHtml += `<td><span class="badge ${globalIdx < 3 ? 'badge-amber' : ''}">#${globalIdx + 1}</span></td>`;
         } else if (col.key === "model_id") {
           const orgBadge = `<span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span>`;
-          rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span class="model-name-link" data-model-id="${m.model_id}" title="Click to view scorecard for ${m.model_name}">${m.model_name}</span> <button class="btn-icon-scorecard" data-model-id="${m.model_id}" title="Open Scorecard for ${m.model_name}">📊</button></div></td>`;
+          const domainBadge = m.primary_domain ? ` <span class="badge badge-domain" title="Primary Specialization: ${m.primary_domain}">${m.primary_domain}</span>` : "";
+          rowsHtml += `<td><div class="model-name-cell">${orgBadge} <span class="model-name-link" data-model-id="${m.model_id}" title="Click to view scorecard for ${m.model_name}">${m.model_name}</span>${domainBadge} <button class="btn-icon-scorecard" data-model-id="${m.model_id}" title="Open Scorecard for ${m.model_name}">📊</button></div></td>`;
+        } else if (col.key === "primary_domain") {
+          const dom = m.primary_domain || "General";
+          rowsHtml += `<td><span class="badge badge-domain">${dom}</span></td>`;
         } else if (col.key === "org") {
           rowsHtml += `<td><span class="org-tag clickable-filter" data-org="${m.org}" title="Click to filter by provider: ${m.org} (Right-click to clear)">${m.org}</span></td>`;
         } else if (col.key === "custom_score") {
@@ -1013,6 +1132,60 @@
         }
       }
 
+      // Enterprise & Domain Workload Alignment
+      const domainContainer = document.getElementById("sc-domain-container");
+      const domainCards = document.getElementById("sc-domain-cards");
+      const domainBadge = document.getElementById("sc-primary-domain-badge");
+      if (domainBadge) {
+        domainBadge.textContent = model.primary_domain || "General Foundation";
+      }
+      if (domainContainer && domainCards) {
+        const domScores = model.domain_scores || {};
+        let domHtml = "";
+        Object.keys(DOMAINS).forEach(dKey => {
+          const dInfo = DOMAINS[dKey];
+          const score = domScores[dKey] !== undefined ? domScores[dKey] : 0.0;
+          let tierClass = "badge-green";
+          let tierLabel = "🌟 Exceptional";
+          let meterColor = "#3fb950";
+          if (score < 40.0) {
+            tierClass = "badge-red";
+            tierLabel = "⚠️ Limited";
+            meterColor = "#f85149";
+          } else if (score < 60.0) {
+            tierClass = "badge-amber";
+            tierLabel = "⚪ Baseline";
+            meterColor = "#d29922";
+          } else if (score < 75.0) {
+            tierClass = "badge-cyan";
+            tierLabel = "🟡 Capable";
+            meterColor = "#58a6ff";
+          } else if (score < 88.0) {
+            tierClass = "badge-blue";
+            tierLabel = "🟢 Strong";
+            meterColor = "#79c0ff";
+          }
+
+          domHtml += `
+            <div class="domain-card" title="${dInfo.title}&#10;Target Personas: ${dInfo.personas}&#10;${dInfo.desc}">
+              <div class="domain-card-header">
+                <span class="domain-card-title">${dInfo.icon} ${dInfo.short}</span>
+                <span class="domain-card-score">${score.toFixed(1)}</span>
+              </div>
+              <div class="domain-card-meter">
+                <div class="domain-card-meter-fill" style="width: ${Math.min(100, Math.max(0, score))}%; background: ${meterColor};"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
+                <span class="badge ${tierClass}" style="font-size: 10px; padding: 1px 5px;">${tierLabel}</span>
+                <span style="font-size: 10px; color: var(--text-secondary);">${dInfo.personas.split(',')[0]}</span>
+              </div>
+              <div class="domain-card-desc">${dInfo.desc}</div>
+            </div>
+          `;
+        });
+        domainCards.innerHTML = domHtml;
+      }
+
       // VRAM Table
       const vramTbody = document.getElementById("sc-vram-table").querySelector("tbody");
       let vramHtml = "";
@@ -1166,6 +1339,39 @@
           ${res.models.map(m => `<td>${r.val(m)}</td>`).join("")}
         </tr>
       `).join("");
+
+      // Domain & Workload Suitability Matrix
+      const cmpDomHead = document.getElementById("cmp-domain-head");
+      const cmpDomBody = document.getElementById("cmp-domain-body");
+      if (cmpDomHead && cmpDomBody) {
+        cmpDomHead.innerHTML = `
+          <tr>
+            <th>Domain / Workload</th>
+            ${res.models.map(m => `<th>${m.model_name}</th>`).join("")}
+          </tr>
+        `;
+        let domRowsHtml = `
+          <tr>
+            <td><strong>Primary Specialization</strong></td>
+            ${res.models.map(m => `<td><span class="badge badge-cyan">${m.primary_domain || "General"}</span></td>`).join("")}
+          </tr>
+        `;
+        Object.keys(DOMAINS).forEach(dKey => {
+          const dInfo = DOMAINS[dKey];
+          domRowsHtml += `
+            <tr>
+              <td><strong>${dInfo.icon} ${dInfo.short}</strong> <div style="font-size: 10px; color: var(--text-secondary);">${dInfo.personas.split(',')[0]}</div></td>
+              ${res.models.map(m => {
+                const sc = m.domain_scores && m.domain_scores[dKey] !== undefined ? m.domain_scores[dKey] : 0;
+                const isTop = res.models.every(other => (other.domain_scores ? (other.domain_scores[dKey] || 0) : 0) <= sc);
+                const crown = isTop && res.models.length > 1 && sc > 40 ? " 👑" : "";
+                return `<td><strong>${sc.toFixed(1)}</strong>${crown}</td>`;
+              }).join("")}
+            </tr>
+          `;
+        });
+        cmpDomBody.innerHTML = domRowsHtml;
+      }
 
       document.getElementById("cmp-btn-copy-md").onclick = () => {
         let md = `# BenchWarmer Model Comparison\n\n`;
@@ -1409,6 +1615,7 @@
       state.orgFilter = "";
       state.licenseFilter = "";
       state.hideProprietary = false;
+      state.filterDomain = "";
       state.currentPage = 1;
       Object.keys(state.benchmarkThresholds).forEach(k => {
         state.benchmarkThresholds[k] = null;
@@ -1426,6 +1633,8 @@
       if (orgSel) orgSel.value = "";
       const licSel = document.getElementById("license-filter-select");
       if (licSel) licSel.value = "";
+      const domSel = document.getElementById("domain-filter-select");
+      if (domSel) domSel.value = "";
       const toggleProp = document.getElementById("toggle-hide-proprietary");
       if (toggleProp) toggleProp.checked = false;
 
@@ -1486,6 +1695,23 @@
       btnClearLicChip.onclick = (e) => {
         e.stopPropagation();
         clearLicenseFilter();
+      };
+    }
+
+    const domSel = document.getElementById("domain-filter-select");
+    if (domSel) {
+      domSel.onchange = (e) => {
+        state.filterDomain = e.target.value;
+        state.currentPage = 1;
+        renderTable();
+      };
+    }
+
+    const btnClearDomChip = document.getElementById("btn-clear-domain-chip");
+    if (btnClearDomChip) {
+      btnClearDomChip.onclick = (e) => {
+        e.stopPropagation();
+        clearDomainFilter();
       };
     }
 
@@ -1574,6 +1800,39 @@
       renderScorerSliders();
       renderTable();
     };
+
+    const pAnalytics = document.getElementById("preset-analytics");
+    if (pAnalytics) {
+      pAnalytics.onclick = () => {
+        state.customWeights = { ifeval: 2.0, bbh: 3.0, math_hard: 3.5, gpqa: 1.0, musr: 0.5, mmlu_pro: 1.5, arena_elo: 0.8 };
+        renderScorerSliders();
+        renderTable();
+      };
+    }
+    const pFinance = document.getElementById("preset-finance");
+    if (pFinance) {
+      pFinance.onclick = () => {
+        state.customWeights = { ifeval: 3.0, bbh: 2.0, math_hard: 3.5, gpqa: 1.5, musr: 0.8, mmlu_pro: 1.2, arena_elo: 0.8 };
+        renderScorerSliders();
+        renderTable();
+      };
+    }
+    const pOffice = document.getElementById("preset-office");
+    if (pOffice) {
+      pOffice.onclick = () => {
+        state.customWeights = { ifeval: 3.5, bbh: 1.0, math_hard: 0.5, gpqa: 0.5, musr: 1.0, mmlu_pro: 2.0, arena_elo: 3.5 };
+        renderScorerSliders();
+        renderTable();
+      };
+    }
+    const pCyber = document.getElementById("preset-cyber");
+    if (pCyber) {
+      pCyber.onclick = () => {
+        state.customWeights = { ifeval: 2.5, bbh: 3.5, math_hard: 2.5, gpqa: 1.2, musr: 0.8, mmlu_pro: 1.5, arena_elo: 0.5 };
+        renderScorerSliders();
+        renderTable();
+      };
+    }
 
     // 11. Header Buttons
     document.getElementById("btn-open-pareto").onclick = showParetoModal;

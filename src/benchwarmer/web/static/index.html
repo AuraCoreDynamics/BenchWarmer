@@ -16,7 +16,7 @@
         <div class="brand-title">
           BenchWarmer
           <span class="badge badge-cyan" id="badge-version">v0.1.0</span>
-          <span class="badge badge-green" id="badge-model-count">1,465 Models</span>
+          <span class="badge badge-green" id="badge-model-count">1,489 Models</span>
         </div>
         <div class="brand-subtitle" id="header-built-date">Current as of November 2026</div>
       </div>
@@ -53,6 +53,10 @@
           <button class="btn btn-sm" id="preset-math">Math & Logic</button>
           <button class="btn btn-sm" id="preset-code">Code & Systems</button>
           <button class="btn btn-sm" id="preset-chat">Chat & Human Pref</button>
+          <button class="btn btn-sm" id="preset-analytics">📊 Analytics & SQL</button>
+          <button class="btn btn-sm" id="preset-finance">📈 Finance & Quant</button>
+          <button class="btn btn-sm" id="preset-office">💼 Enterprise Office</button>
+          <button class="btn btn-sm" id="preset-cyber">🛡️ Cybersecurity</button>
         </div>
       </div>
       <div class="scorer-grid" id="scorer-sliders-grid">
@@ -111,6 +115,21 @@
           </select>
         </label>
 
+        <label class="range-control">
+          <span>Domain:</span>
+          <select id="domain-filter-select" class="select-control" style="max-width: 175px;">
+            <option value="">All Domains</option>
+            <option value="coding">💻 Coding & DevOps</option>
+            <option value="analytics">📊 Analytics & SQL</option>
+            <option value="finance">📈 Finance & Quant</option>
+            <option value="office">💼 Enterprise Office</option>
+            <option value="legal">⚖️ Legal & Compliance</option>
+            <option value="math_science">🔬 Math & Science</option>
+            <option value="cybersecurity">🛡️ Cybersecurity</option>
+            <option value="edge">📱 Edge & On-Device</option>
+          </select>
+        </label>
+
         <label class="range-control checkbox-control" title="Hide proprietary API cloud models and show only open-weight models">
           <input type="checkbox" id="toggle-hide-proprietary">
           <span>Hide Proprietary</span>
@@ -121,7 +140,7 @@
 
       <div class="toolbar-group">
         <button class="btn btn-sm" id="btn-reset-filters">Reset Filters</button>
-        <span class="text-secondary" style="font-size: 12px;" id="match-count">1,465 models displayed</span>
+        <span class="text-secondary" style="font-size: 12px;" id="match-count">1,489 models displayed</span>
       </div>
     </div>
 
@@ -139,6 +158,10 @@
       <span id="active-prop-chip" class="filter-chip chip-proprietary" style="display: none;">
         <span>Open Weights Only</span>
         <button class="chip-close" id="btn-clear-prop-chip" title="Show proprietary models">✕</button>
+      </span>
+      <span id="active-domain-chip" class="filter-chip chip-domain" style="display: none;">
+        <span>Domain: <strong id="active-domain-text"></strong></span>
+        <button class="chip-close" id="btn-clear-domain-chip" title="Clear domain specialization filter">✕</button>
       </span>
     </div>
 
@@ -298,6 +321,18 @@
           <div class="metric-cards-grid" id="sc-distinctive-cards"></div>
         </div>
 
+        <!-- Domain Alignment & Role Workload Suitability -->
+        <div id="sc-domain-container" style="margin-top: 14px;">
+          <div class="chart-title" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>🎯 Enterprise & Role Workload Alignment</span>
+              <span class="badge badge-cyan" id="sc-primary-domain-badge">Primary Domain</span>
+            </div>
+            <span style="font-size: 11px; color: var(--text-secondary);">Suitability scores [0–100] for developers, office workers, analysts</span>
+          </div>
+          <div class="domain-cards-grid" id="sc-domain-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px;"></div>
+        </div>
+
         <!-- VRAM Quantization Matrix -->
         <div>
           <div class="chart-title" style="margin-bottom: 8px;">VRAM Footprint across Quantizations (+15% Overhead)</div>
@@ -354,6 +389,15 @@
           <table class="sub-table" id="cmp-specs-table">
             <thead id="cmp-specs-head"></thead>
             <tbody id="cmp-specs-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Domain Alignment Matrix -->
+        <div style="margin-top: 14px;">
+          <div class="chart-title" style="margin-bottom: 8px;">🎯 Domain & Persona Suitability Matrix</div>
+          <table class="sub-table" id="cmp-domain-table">
+            <thead id="cmp-domain-head"></thead>
+            <tbody id="cmp-domain-body"></tbody>
           </table>
         </div>
       </div>

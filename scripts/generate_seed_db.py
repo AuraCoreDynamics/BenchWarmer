@@ -2284,6 +2284,455 @@ MODELS_SEED_DATA = [
             "ifeval": 60.10, "bbh": 54.80, "math_hard": 31.20,
             "gpqa": 29.50, "musr": 40.20, "mmlu_pro": 41.50, "arena_elo": 1018.0
         }
+    },
+
+    # --- Amazon Nova Frontier Series ---
+    {
+        "model_id": "amazon/nova-pro-v1.0",
+        "org": "amazon",
+        "model_name": "nova-pro-v1.0",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 300000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 86.80, "bbh": 89.20, "math_hard": 78.40,
+            "gpqa": 68.50, "musr": 58.20, "mmlu_pro": 76.50, "arena_elo": 1342.0,
+            "swe_bench_verified": 45.80, "swe_bench_pro": 32.50, "cybergym": 58.00,
+            "hle_tools": 34.20, "aime_2024": 56.40, "codeforces_elo": 1820.0
+        }
+    },
+    {
+        "model_id": "amazon/nova-lite-v1.0",
+        "org": "amazon",
+        "model_name": "nova-lite-v1.0",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 300000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 81.20, "bbh": 82.50, "math_hard": 65.20,
+            "gpqa": 55.40, "musr": 51.00, "mmlu_pro": 66.80, "arena_elo": 1296.0,
+            "swe_bench_verified": 34.00, "aime_2024": 38.50
+        }
+    },
+    {
+        "model_id": "amazon/nova-micro-v1.0",
+        "org": "amazon",
+        "model_name": "nova-micro-v1.0",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 128000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 74.50, "bbh": 72.80, "math_hard": 48.00,
+            "gpqa": 44.20, "musr": 44.50, "mmlu_pro": 54.00, "arena_elo": 1242.0
+        }
+    },
+
+    # --- 01.AI & Zhipu AI (GLM) Frontier Series ---
+    {
+        "model_id": "01-ai/Yi-Lightning",
+        "org": "01-ai",
+        "model_name": "Yi-Lightning",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 16384,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 87.50, "bbh": 90.40, "math_hard": 81.20,
+            "gpqa": 70.80, "musr": 61.00, "mmlu_pro": 78.40, "arena_elo": 1354.0,
+            "swe_bench_verified": 48.20, "swe_bench_pro": 35.00, "aime_2024": 64.00, "codeforces_elo": 1950.0
+        }
+    },
+    {
+        "model_id": "THUDM/GLM-4-Plus",
+        "org": "THUDM",
+        "model_name": "GLM-4-Plus",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 128000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 85.90, "bbh": 88.60, "math_hard": 76.50,
+            "gpqa": 67.20, "musr": 57.40, "mmlu_pro": 75.10, "arena_elo": 1338.0,
+            "swe_bench_verified": 44.50, "aime_2024": 55.00, "codeforces_elo": 1880.0
+        }
+    },
+    {
+        "model_id": "THUDM/GLM-Zero-Preview",
+        "org": "THUDM",
+        "model_name": "GLM-Zero-Preview",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 128000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 84.00, "bbh": 91.50, "math_hard": 89.20,
+            "gpqa": 72.00, "musr": 62.50, "mmlu_pro": 78.90, "arena_elo": 1348.0,
+            "swe_bench_verified": 52.00, "swe_bench_pro": 38.00, "aime_2024": 76.20, "codeforces_elo": 2150.0
+        }
+    },
+
+    # --- MiniMax Long-Context Architecture (4M Tokens) ---
+    {
+        "model_id": "minimax/MiniMax-Text-01",
+        "org": "minimax",
+        "model_name": "MiniMax-Text-01",
+        "base_model": None,
+        "params_b": 456.0,
+        "active_params_b": 45.9,
+        "context_length": 4000000,
+        "architecture": "MiniMaxMoEForCausalLM",
+        "license": "other",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 86.20, "bbh": 88.50, "math_hard": 75.40,
+            "gpqa": 65.80, "musr": 56.50, "mmlu_pro": 74.20, "arena_elo": 1335.0,
+            "swe_bench_verified": 43.50, "aime_2024": 54.00
+        }
+    },
+
+    # --- AI21 Jamba Mamba-Transformer Hybrid MoE Series ---
+    {
+        "model_id": "ai21labs/AI21-Jamba-1.5-Large",
+        "org": "ai21labs",
+        "model_name": "AI21-Jamba-1.5-Large",
+        "base_model": None,
+        "params_b": 398.0,
+        "active_params_b": 94.0,
+        "context_length": 256000,
+        "architecture": "JambaForCausalLM",
+        "license": "jamba-open-model-license",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 84.50, "bbh": 86.80, "math_hard": 68.50,
+            "gpqa": 62.40, "musr": 54.00, "mmlu_pro": 70.80, "arena_elo": 1298.0,
+            "swe_bench_verified": 38.00, "aime_2024": 42.00
+        }
+    },
+    {
+        "model_id": "ai21labs/AI21-Jamba-1.5-Mini",
+        "org": "ai21labs",
+        "model_name": "AI21-Jamba-1.5-Mini",
+        "base_model": None,
+        "params_b": 52.0,
+        "active_params_b": 12.0,
+        "context_length": 256000,
+        "architecture": "JambaForCausalLM",
+        "license": "jamba-open-model-license",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 79.20, "bbh": 80.50, "math_hard": 56.40,
+            "gpqa": 51.00, "musr": 47.80, "mmlu_pro": 61.50, "arena_elo": 1248.0,
+            "swe_bench_verified": 28.50, "aime_2024": 31.00
+        }
+    },
+
+    # --- Liquid AI Dynamical System Neural Networks ---
+    {
+        "model_id": "liquid-ai/LFM-40B-MoE",
+        "org": "liquid-ai",
+        "model_name": "LFM-40B-MoE",
+        "base_model": None,
+        "params_b": 40.0,
+        "active_params_b": 12.0,
+        "context_length": 32768,
+        "architecture": "LFMForCausalLM",
+        "license": "lfm-open",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 80.40, "bbh": 81.20, "math_hard": 58.00,
+            "gpqa": 53.50, "musr": 48.00, "mmlu_pro": 62.40, "arena_elo": 1262.0
+        }
+    },
+    {
+        "model_id": "liquid-ai/LFM-7B",
+        "org": "liquid-ai",
+        "model_name": "LFM-7B",
+        "base_model": None,
+        "params_b": 7.0,
+        "active_params_b": 7.0,
+        "context_length": 32768,
+        "architecture": "LFMForCausalLM",
+        "license": "lfm-open",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 72.80, "bbh": 71.00, "math_hard": 42.50,
+            "gpqa": 41.00, "musr": 41.50, "mmlu_pro": 51.20, "arena_elo": 1198.0
+        }
+    },
+
+    # --- Mistral AI State-Space & Edge Models ---
+    {
+        "model_id": "mistralai/Codestral-Mamba-7B-v0.1",
+        "org": "mistralai",
+        "model_name": "Codestral-Mamba-7B-v0.1",
+        "base_model": None,
+        "params_b": 7.28,
+        "active_params_b": 7.28,
+        "context_length": 256000,
+        "architecture": "Mamba2ForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 74.00, "bbh": 72.50, "math_hard": 54.00,
+            "gpqa": 44.00, "musr": 42.00, "mmlu_pro": 55.40, "arena_elo": 1225.0,
+            "swe_bench_verified": 35.80, "livecodebench": 42.50
+        }
+    },
+    {
+        "model_id": "mistralai/Ministral-3B-Instruct-2410",
+        "org": "mistralai",
+        "model_name": "Ministral-3B-Instruct-2410",
+        "base_model": None,
+        "params_b": 3.0,
+        "active_params_b": 3.0,
+        "context_length": 128000,
+        "architecture": "MistralForCausalLM",
+        "license": "mistral-research",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 76.50, "bbh": 72.00, "math_hard": 49.50,
+            "gpqa": 42.80, "musr": 43.00, "mmlu_pro": 53.60, "arena_elo": 1238.0,
+            "swe_bench_verified": 29.50
+        }
+    },
+
+    # --- Frontier Open-Weights 405B Flagships ---
+    {
+        "model_id": "NousResearch/Hermes-3-Llama-3.1-405B",
+        "org": "NousResearch",
+        "model_name": "Hermes-3-Llama-3.1-405B",
+        "base_model": "meta-llama/Llama-3.1-405B",
+        "params_b": 405.0,
+        "active_params_b": 405.0,
+        "context_length": 128000,
+        "architecture": "LlamaForCausalLM",
+        "license": "llama3.1",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 88.40, "bbh": 91.20, "math_hard": 78.50,
+            "gpqa": 68.90, "musr": 60.50, "mmlu_pro": 76.80, "arena_elo": 1358.0,
+            "swe_bench_verified": 46.20, "cybergym": 62.00, "hle_tools": 32.50, "aime_2024": 58.00
+        }
+    },
+    {
+        "model_id": "allenai/Llama-3.1-Tulu-3-405B",
+        "org": "allenai",
+        "model_name": "Llama-3.1-Tulu-3-405B",
+        "base_model": "meta-llama/Llama-3.1-405B",
+        "params_b": 405.0,
+        "active_params_b": 405.0,
+        "context_length": 128000,
+        "architecture": "LlamaForCausalLM",
+        "license": "llama3.1",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 89.10, "bbh": 91.80, "math_hard": 79.20,
+            "gpqa": 69.50, "musr": 61.20, "mmlu_pro": 77.40, "arena_elo": 1362.0,
+            "swe_bench_verified": 47.50, "aime_2024": 61.00
+        }
+    },
+
+    # --- Tencent Hunyuan Large & NVIDIA Nemotron 51B ---
+    {
+        "model_id": "tencent/Hunyuan-Large",
+        "org": "tencent",
+        "model_name": "Hunyuan-Large",
+        "base_model": None,
+        "params_b": 389.0,
+        "active_params_b": 52.0,
+        "context_length": 256000,
+        "architecture": "HunyuanLargeForCausalLM",
+        "license": "tencent-hunyuan-community",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 86.40, "bbh": 89.50, "math_hard": 77.80,
+            "gpqa": 67.00, "musr": 58.00, "mmlu_pro": 75.80, "arena_elo": 1340.0,
+            "swe_bench_verified": 44.00, "aime_2024": 56.00
+        }
+    },
+    {
+        "model_id": "nvidia/Llama-3.1-Nemotron-51B-Instruct",
+        "org": "nvidia",
+        "model_name": "Llama-3.1-Nemotron-51B-Instruct",
+        "base_model": "meta-llama/Llama-3.1-70B",
+        "params_b": 51.0,
+        "active_params_b": 51.0,
+        "context_length": 128000,
+        "architecture": "LlamaForCausalLM",
+        "license": "llama3.1",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 87.20, "bbh": 86.00, "math_hard": 71.00,
+            "gpqa": 63.50, "musr": 53.00, "mmlu_pro": 71.40, "arena_elo": 1324.0,
+            "swe_bench_verified": 41.50, "aime_2024": 48.00
+        }
+    },
+
+    # --- Apple OpenELM & Zyphra Zamba2 Edge Models ---
+    {
+        "model_id": "apple/OpenELM-3B-Instruct",
+        "org": "apple",
+        "model_name": "OpenELM-3B-Instruct",
+        "base_model": "apple/OpenELM-3B",
+        "params_b": 3.04,
+        "active_params_b": 3.04,
+        "context_length": 2048,
+        "architecture": "OpenELMForCausalLM",
+        "license": "apple-sample-code",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 48.20, "bbh": 44.50, "math_hard": 18.00,
+            "gpqa": 24.50, "musr": 32.00, "mmlu_pro": 32.80, "arena_elo": 1040.0
+        }
+    },
+    {
+        "model_id": "apple/OpenELM-1.1B-Instruct",
+        "org": "apple",
+        "model_name": "OpenELM-1.1B-Instruct",
+        "base_model": "apple/OpenELM-1.1B",
+        "params_b": 1.08,
+        "active_params_b": 1.08,
+        "context_length": 2048,
+        "architecture": "OpenELMForCausalLM",
+        "license": "apple-sample-code",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 39.50, "bbh": 36.20, "math_hard": 11.20,
+            "gpqa": 19.80, "musr": 28.00, "mmlu_pro": 24.50, "arena_elo": 980.0
+        }
+    },
+    {
+        "model_id": "zyphra/Zamba2-7B-Instruct",
+        "org": "zyphra",
+        "model_name": "Zamba2-7B-Instruct",
+        "base_model": "zyphra/Zamba2-7B",
+        "params_b": 7.0,
+        "active_params_b": 7.0,
+        "context_length": 8192,
+        "architecture": "Zamba2ForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 74.80, "bbh": 73.20, "math_hard": 46.00,
+            "gpqa": 42.50, "musr": 42.80, "mmlu_pro": 54.10, "arena_elo": 1215.0
+        }
+    },
+
+    # --- Meta Llama 3.2 Multimodal Vision Models ---
+    {
+        "model_id": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+        "org": "meta-llama",
+        "model_name": "Llama-3.2-11B-Vision-Instruct",
+        "base_model": "meta-llama/Llama-3.2-11B",
+        "params_b": 11.0,
+        "active_params_b": 11.0,
+        "context_length": 128000,
+        "architecture": "MllamaForConditionalGeneration",
+        "license": "llama3.2",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 82.50, "bbh": 78.40, "math_hard": 58.20,
+            "gpqa": 51.50, "musr": 47.00, "mmlu_pro": 62.80, "arena_elo": 1265.0,
+            "swe_bench_verified": 32.00
+        }
+    },
+    {
+        "model_id": "meta-llama/Llama-3.2-90B-Vision-Instruct",
+        "org": "meta-llama",
+        "model_name": "Llama-3.2-90B-Vision-Instruct",
+        "base_model": "meta-llama/Llama-3.2-90B",
+        "params_b": 90.0,
+        "active_params_b": 90.0,
+        "context_length": 128000,
+        "architecture": "MllamaForConditionalGeneration",
+        "license": "llama3.2",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 87.80, "bbh": 88.00, "math_hard": 74.50,
+            "gpqa": 66.80, "musr": 58.20, "mmlu_pro": 74.00, "arena_elo": 1332.0,
+            "swe_bench_verified": 43.00, "aime_2024": 52.00
+        }
+    },
+
+    # --- Salesforce Action Models & IBM Granite Code Models ---
+    {
+        "model_id": "Salesforce/xLAM-7b-fc-r",
+        "org": "Salesforce",
+        "model_name": "xLAM-7b-fc-r",
+        "base_model": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "params_b": 8.03,
+        "active_params_b": 8.03,
+        "context_length": 8192,
+        "architecture": "LlamaForCausalLM",
+        "license": "cc-by-nc-4.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 81.00, "bbh": 76.50, "math_hard": 52.00,
+            "gpqa": 46.50, "musr": 44.00, "mmlu_pro": 58.20, "arena_elo": 1240.0,
+            "swe_bench_verified": 33.50, "hle_tools": 28.50
+        }
+    },
+    {
+        "model_id": "ibm-granite/granite-34b-code-instruct",
+        "org": "ibm-granite",
+        "model_name": "granite-34b-code-instruct",
+        "base_model": "ibm-granite/granite-34b-code-base",
+        "params_b": 34.0,
+        "active_params_b": 34.0,
+        "context_length": 8192,
+        "architecture": "GraniteForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 78.40, "bbh": 77.20, "math_hard": 62.00,
+            "gpqa": 49.00, "musr": 45.20, "mmlu_pro": 61.00, "arena_elo": 1252.0,
+            "swe_bench_verified": 38.20, "livecodebench": 45.00
+        }
     }
 ]
 

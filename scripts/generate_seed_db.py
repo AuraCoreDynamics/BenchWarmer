@@ -330,6 +330,57 @@ MODELS_SEED_DATA = [
 
     # --- Anthropic Claude Models ---
     {
+        "model_id": "anthropic/claude-mythos-preview",
+        "org": "anthropic",
+        "model_name": "claude-mythos-preview",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 91.80, "bbh": 95.20, "math_hard": 92.50,
+            "gpqa": 94.60, "musr": 89.40, "mmlu_pro": 93.60, "arena_elo": 1420.0
+        }
+    },
+    {
+        "model_id": "anthropic/claude-mythos-5",
+        "org": "anthropic",
+        "model_name": "claude-mythos-5",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 500000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 92.40, "bbh": 96.00, "math_hard": 93.80,
+            "gpqa": 95.20, "musr": 90.10, "mmlu_pro": 94.10, "arena_elo": 1425.0
+        }
+    },
+    {
+        "model_id": "anthropic/claude-fable",
+        "org": "anthropic",
+        "model_name": "claude-fable",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 200000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 89.70, "bbh": 91.00, "math_hard": 86.40,
+            "gpqa": 89.20, "musr": 84.50, "mmlu_pro": 87.50, "arena_elo": 1355.0
+        }
+    },
+    {
         "model_id": "anthropic/claude-3-7-sonnet",
         "org": "anthropic",
         "model_name": "claude-3-7-sonnet",
@@ -399,6 +450,40 @@ MODELS_SEED_DATA = [
     },
 
     # --- Google Gemini & Gemma Models ---
+    {
+        "model_id": "google/gemini-2.5-pro",
+        "org": "google",
+        "model_name": "gemini-2.5-pro",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 2000000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 89.00, "bbh": 92.50, "math_hard": 91.00,
+            "gpqa": 84.00, "musr": 78.00, "mmlu_pro": 88.50, "arena_elo": 1395.0
+        }
+    },
+    {
+        "model_id": "google/gemini-2.5-flash",
+        "org": "google",
+        "model_name": "gemini-2.5-flash",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 1000000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 86.40, "bbh": 88.20, "math_hard": 87.50,
+            "gpqa": 75.80, "musr": 71.00, "mmlu_pro": 84.20, "arena_elo": 1350.0
+        }
+    },
     {
         "model_id": "google/gemini-2.0-flash-exp",
         "org": "google",
@@ -1639,6 +1724,41 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 35.20, "bbh": 82.00, "math_hard": 14.10,
             "gpqa": 28.00, "musr": 38.00, "mmlu_pro": 92.10, "arena_elo": 1045.0
+        }
+    },
+    # --- Gryphe Mytho Series ---
+    {
+        "model_id": "Gryphe/MythoMax-L2-13b",
+        "org": "Gryphe",
+        "model_name": "MythoMax-L2-13b",
+        "base_model": "meta-llama/Llama-2-13b-hf",
+        "params_b": 13.0,
+        "active_params_b": 13.0,
+        "context_length": 4096,
+        "architecture": "LlamaForCausalLM",
+        "license": "other",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 62.40, "bbh": 58.10, "math_hard": 34.50,
+            "gpqa": 31.80, "musr": 42.60, "mmlu_pro": 44.80, "arena_elo": 1045.0
+        }
+    },
+    {
+        "model_id": "Gryphe/MythoMist-7b",
+        "org": "Gryphe",
+        "model_name": "MythoMist-7b",
+        "base_model": "mistralai/Mistral-7B-v0.1",
+        "params_b": 7.24,
+        "active_params_b": 7.24,
+        "context_length": 32768,
+        "architecture": "MistralForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 60.10, "bbh": 54.80, "math_hard": 31.20,
+            "gpqa": 29.50, "musr": 40.20, "mmlu_pro": 41.50, "arena_elo": 1018.0
         }
     }
 ]

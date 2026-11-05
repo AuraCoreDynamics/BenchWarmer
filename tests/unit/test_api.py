@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "1431")
+        self.assertEqual(meta.get("model_count"), "1438")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -190,15 +190,33 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 1431)
+        self.assertEqual(len(all_audits), 1438)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 1431)
+        self.assertEqual(len(detailed), 1438)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
+
+    def test_12_mythos_and_frontier_models(self):
+        mythos = self.bw.get_model("anthropic/claude-mythos-preview")
+        self.assertIsNotNone(mythos)
+        self.assertEqual(mythos.org, "anthropic")
+        self.assertEqual(mythos.raw_scores["gpqa"], 94.60)
+        self.assertEqual(mythos.raw_scores["mmlu_pro"], 93.60)
+        self.assertEqual(mythos.raw_scores["arena_elo"], 1420.0)
+
+        fable = self.bw.get_model("anthropic/claude-fable")
+        self.assertIsNotNone(fable)
+        self.assertEqual(fable.org, "anthropic")
+        self.assertEqual(fable.raw_scores["gpqa"], 89.20)
+
+        mythomax = self.bw.get_model("Gryphe/MythoMax-L2-13b")
+        self.assertIsNotNone(mythomax)
+        self.assertEqual(mythomax.org, "Gryphe")
+        self.assertEqual(mythomax.params_b, 13.0)
 
 
 if __name__ == "__main__":

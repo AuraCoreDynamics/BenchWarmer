@@ -168,7 +168,7 @@ python -m benchwarmer.web.server --port 8765
 ```
 
 ### Visual Features:
-- **Leaderboard & Filters**: Explore 1,431 models with sub-second FTS search, provider/license click-to-filter, and active chip toggling.
+- **Leaderboard & Filters**: Explore 1,438 models with sub-second FTS search, provider/license click-to-filter, and active chip toggling.
 - **Model Scorecard Modal**: Double-click any row to view 6-axis SVG radar polygons and 10-quantization VRAM matrices.
 - **Multi-Model Comparator**: Side-by-side radar overlays, horizontal benchmark bar charts with Best-in-Class crown awards, and one-click Markdown clipboard exports.
 - **Pareto Frontier Analysis**: 2D scatter plots of capability vs. VRAM with non-dominated frontier curves and hardware tier classifications.

@@ -21,7 +21,7 @@ All screenshots in this document are automatically captured directly from live b
 
 ## 1. Interactive Leaderboard & Real-Time Exploration
 
-The primary leaderboard provides instant visibility into 1,431 modern LLMs across 82 providers, built directly on top of the embedded SQLite datastore.
+The primary leaderboard provides instant visibility into 1,438 modern LLMs across 83 providers, built directly on top of the embedded SQLite datastore.
 
 ![Leaderboard Overview](screenshots/01_leaderboard_overview.png)
 
@@ -35,7 +35,7 @@ The primary leaderboard provides instant visibility into 1,431 modern LLMs acros
 
 ## 2. Provider & License Click-to-Filter System
 
-Navigating through 1,431 models is streamlined with instant click-to-filter tag interaction, context-menu clearing, and active filter chips.
+Navigating through 1,438 models is streamlined with instant click-to-filter tag interaction, context-menu clearing, and active filter chips.
 
 ![Provider & License Filtering](screenshots/02_provider_and_license_filtering.png)
 

@@ -24,7 +24,7 @@ class TestBenchWarmerAPI(unittest.TestCase):
         meta = self.bw.get_metadata()
         self.assertIn("version", meta)
         self.assertIn("canonical_sha256", meta)
-        self.assertEqual(meta.get("model_count"), "1449")
+        self.assertEqual(meta.get("model_count"), "1465")
 
         benchmarks = self.bw.list_benchmarks()
         self.assertIn("ifeval", benchmarks)
@@ -190,13 +190,13 @@ class TestBenchWarmerAPI(unittest.TestCase):
 
         # Audit all
         all_audits = self.bw.audit_all()
-        self.assertEqual(len(all_audits), 1449)
+        self.assertEqual(len(all_audits), 1465)
         # Verify highest risk comes first
         self.assertEqual(all_audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         # Detailed models list
         detailed = self.bw.get_all_models_detailed()
-        self.assertEqual(len(detailed), 1449)
+        self.assertEqual(len(detailed), 1465)
         self.assertIn("estimated_vram_gb", detailed[0])
         self.assertIn("scores", detailed[0])
 
@@ -211,6 +211,20 @@ class TestBenchWarmerAPI(unittest.TestCase):
         self.assertEqual(mythos.distinctive_benchmarks["swe_bench_pro"], 77.80)
         self.assertEqual(mythos.distinctive_benchmarks["cybergym"], 83.10)
         self.assertEqual(mythos.distinctive_benchmarks["hle_tools"], 64.70)
+
+        # Test Mistral Large 4 1T MoE and GGUF alias
+        mistral_4 = self.bw.get_model("mistralai/Mistral-Large-4-1T-A52B-Instruct")
+        self.assertIsNotNone(mistral_4)
+        self.assertEqual(mistral_4.params_b, 1050.0)
+        self.assertEqual(mistral_4.active_params_b, 52.0)
+        self.assertTrue(mistral_4.is_moe)
+        self.assertEqual(mistral_4.context_length, 1000000)
+        self.assertEqual(mistral_4.distinctive_benchmarks["swe_bench_verified"], 68.80)
+
+        mistral_gguf = self.bw.get_model("ggml-org/Mistral-Large-4-1T-A52B-GGUF")
+        self.assertIsNotNone(mistral_gguf)
+        self.assertEqual(mistral_gguf.params_b, 1050.0)
+        self.assertEqual(mistral_gguf.distinctive_benchmarks["swe_bench_verified"], 68.20)
 
         o3 = self.bw.get_model("openai/o3")
         self.assertIsNotNone(o3)

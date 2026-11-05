@@ -523,8 +523,8 @@
       // 0b. Hide Proprietary filter (Open-Weights Only)
       if (state.hideProprietary) {
         const isProprietary = (m.license && m.license.toLowerCase() === "proprietary") ||
-                              (m.architecture && m.architecture.toLowerCase() === "proprietary") ||
-                              m.params_b === null;
+          (m.architecture && m.architecture.toLowerCase() === "proprietary") ||
+          m.params_b === null;
         if (isProprietary) return false;
       }
 
@@ -751,8 +751,8 @@
 
     const pagInfo = document.getElementById("pagination-info");
     if (pagInfo) {
-      pagInfo.textContent = totalCount > 0 
-        ? `Showing ${startIdx + 1}–${endIdx} of ${totalCount} models` 
+      pagInfo.textContent = totalCount > 0
+        ? `Showing ${(startIdx + 1).toLocaleString()}–${endIdx.toLocaleString()} of ${totalCount.toLocaleString()} models`
         : `Showing 0 of 0 models`;
     }
 

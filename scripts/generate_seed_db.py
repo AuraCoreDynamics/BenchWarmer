@@ -775,6 +775,75 @@ MODELS_SEED_DATA = [
         }
     },
     {
+        "model_id": "google/gemma-3-27b-it",
+        "org": "google",
+        "model_name": "gemma-3-27b-it",
+        "base_model": None,
+        "params_b": 27.20,
+        "active_params_b": 27.20,
+        "context_length": 128000,
+        "architecture": "Gemma3ForCausalLM",
+        "license": "gemma",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 86.40, "bbh": 85.50, "math_hard": 79.50,
+            "gpqa": 67.50, "musr": 57.20, "mmlu_pro": 75.80, "arena_elo": 1339.0,
+            "aime_2024": 68.50
+        }
+    },
+    {
+        "model_id": "google/gemma-3-12b-it",
+        "org": "google",
+        "model_name": "gemma-3-12b-it",
+        "base_model": None,
+        "params_b": 12.10,
+        "active_params_b": 12.10,
+        "context_length": 128000,
+        "architecture": "Gemma3ForCausalLM",
+        "license": "gemma",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 82.10, "bbh": 80.50, "math_hard": 71.00,
+            "gpqa": 58.00, "musr": 51.50, "mmlu_pro": 68.20, "arena_elo": 1285.0
+        }
+    },
+    {
+        "model_id": "google/gemma-3-4b-it",
+        "org": "google",
+        "model_name": "gemma-3-4b-it",
+        "base_model": None,
+        "params_b": 4.30,
+        "active_params_b": 4.30,
+        "context_length": 128000,
+        "architecture": "Gemma3ForCausalLM",
+        "license": "gemma",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 76.50, "bbh": 74.00, "math_hard": 62.50,
+            "gpqa": 48.00, "musr": 44.00, "mmlu_pro": 59.50, "arena_elo": 1230.0
+        }
+    },
+    {
+        "model_id": "google/gemma-3-1b-it",
+        "org": "google",
+        "model_name": "gemma-3-1b-it",
+        "base_model": None,
+        "params_b": 1.20,
+        "active_params_b": 1.20,
+        "context_length": 32768,
+        "architecture": "Gemma3ForCausalLM",
+        "license": "gemma",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 68.00, "bbh": 61.20, "math_hard": 45.00,
+            "gpqa": 38.50, "musr": 36.00, "mmlu_pro": 46.50, "arena_elo": 1150.0
+        }
+    },
+    {
         "model_id": "google/gemma-2-27b-it",
         "org": "google",
         "model_name": "gemma-2-27b-it",
@@ -1173,6 +1242,41 @@ MODELS_SEED_DATA = [
         }
     },
     {
+        "model_id": "deepseek-ai/DeepSeek-V3-Base",
+        "org": "deepseek-ai",
+        "model_name": "DeepSeek-V3-Base",
+        "base_model": None,
+        "params_b": 671.0,
+        "active_params_b": 37.0,
+        "context_length": 131072,
+        "architecture": "DeepseekV3ForCausalLM",
+        "license": "mit",
+        "precision": "FP8",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 81.50, "bbh": 86.80, "math_hard": 72.50,
+            "gpqa": 56.00, "musr": 56.20, "mmlu_pro": 76.50, "arena_elo": 1340.0
+        }
+    },
+    {
+        "model_id": "deepseek-ai/DeepSeek-R1-Zero",
+        "org": "deepseek-ai",
+        "model_name": "DeepSeek-R1-Zero",
+        "base_model": None,
+        "params_b": 671.0,
+        "active_params_b": 37.0,
+        "context_length": 131072,
+        "architecture": "DeepseekV3ForCausalLM",
+        "license": "mit",
+        "precision": "FP8",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 78.50, "bbh": 90.20, "math_hard": 92.50,
+            "gpqa": 78.50, "musr": 60.50, "mmlu_pro": 83.00, "arena_elo": 1345.0,
+            "aime_2024": 86.50, "codeforces_elo": 2350.0
+        }
+    },
+    {
         "model_id": "deepseek-ai/DeepSeek-V2.5",
         "org": "deepseek-ai",
         "model_name": "DeepSeek-V2.5",
@@ -1381,6 +1485,42 @@ MODELS_SEED_DATA = [
         }
     },
     {
+        "model_id": "Qwen/Qwen2.5-Max",
+        "org": "Qwen",
+        "model_name": "Qwen2.5-Max",
+        "base_model": None,
+        "params_b": 236.0,
+        "active_params_b": 57.0,
+        "context_length": 128000,
+        "architecture": "Qwen2MoEForCausalLM",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 91.50, "bbh": 93.00, "math_hard": 90.20,
+            "gpqa": 82.50, "musr": 72.00, "mmlu_pro": 88.00, "arena_elo": 1382.0,
+            "swe_bench_verified": 74.50, "aime_2024": 88.00, "codeforces_elo": 2450.0
+        }
+    },
+    {
+        "model_id": "Qwen/Qwen2.5-Plus",
+        "org": "Qwen",
+        "model_name": "Qwen2.5-Plus",
+        "base_model": None,
+        "params_b": 120.0,
+        "active_params_b": 35.0,
+        "context_length": 128000,
+        "architecture": "Qwen2MoEForCausalLM",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 88.00, "bbh": 89.50, "math_hard": 85.00,
+            "gpqa": 76.00, "musr": 65.00, "mmlu_pro": 82.50, "arena_elo": 1350.0,
+            "swe_bench_verified": 66.00
+        }
+    },
+    {
         "model_id": "Qwen/Qwen2.5-72B-Instruct",
         "org": "Qwen",
         "model_name": "Qwen2.5-72B-Instruct",
@@ -1570,6 +1710,96 @@ MODELS_SEED_DATA = [
 
     # --- Mistral AI Models ---
     {
+        "model_id": "mistralai/Mistral-Large-4-1T-A52B-Instruct",
+        "org": "mistralai",
+        "model_name": "Mistral-Large-4-1T-A52B-Instruct",
+        "base_model": "mistralai/Mistral-Large-4-1T-A52B",
+        "params_b": 1050.0,
+        "active_params_b": 52.0,
+        "context_length": 1000000,
+        "architecture": "MistralMoEForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 91.20, "bbh": 90.80, "math_hard": 84.80,
+            "gpqa": 75.20, "musr": 67.20, "mmlu_pro": 80.60, "arena_elo": 1395.0,
+            "swe_bench_verified": 68.80, "swe_bench_pro": 54.50, "aime_2024": 83.50, "cybergym": 62.00
+        }
+    },
+    {
+        "model_id": "mistralai/Mistral-Large-4-1T-A52B",
+        "org": "mistralai",
+        "model_name": "Mistral-Large-4-1T-A52B",
+        "base_model": None,
+        "params_b": 1050.0,
+        "active_params_b": 52.0,
+        "context_length": 1000000,
+        "architecture": "MistralMoEForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 88.50, "bbh": 89.20, "math_hard": 82.50,
+            "gpqa": 72.80, "musr": 64.50, "mmlu_pro": 78.40, "arena_elo": 1380.0,
+            "swe_bench_verified": 65.50, "swe_bench_pro": 51.20, "aime_2024": 81.00
+        }
+    },
+    {
+        "model_id": "ggml-org/Mistral-Large-4-1T-A52B-GGUF",
+        "org": "ggml-org",
+        "model_name": "Mistral-Large-4-1T-A52B-GGUF",
+        "base_model": "mistralai/Mistral-Large-4-1T-A52B",
+        "params_b": 1050.0,
+        "active_params_b": 52.0,
+        "context_length": 1000000,
+        "architecture": "MistralMoEForCausalLM",
+        "license": "apache-2.0",
+        "precision": "Q4_K_M",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 91.00, "bbh": 90.50, "math_hard": 84.50,
+            "gpqa": 74.80, "musr": 66.80, "mmlu_pro": 80.20, "arena_elo": 1392.0,
+            "swe_bench_verified": 68.20, "swe_bench_pro": 54.00, "aime_2024": 83.00
+        }
+    },
+    {
+        "model_id": "mistralai/Pixtral-Large-Instruct-2411",
+        "org": "mistralai",
+        "model_name": "Pixtral-Large-Instruct-2411",
+        "base_model": None,
+        "params_b": 124.0,
+        "active_params_b": 124.0,
+        "context_length": 128000,
+        "architecture": "MistralForCausalLM",
+        "license": "other",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 87.50, "bbh": 86.20, "math_hard": 78.40,
+            "gpqa": 68.50, "musr": 60.20, "mmlu_pro": 76.50, "arena_elo": 1340.0,
+            "swe_bench_verified": 58.00
+        }
+    },
+    {
+        "model_id": "mistralai/Codestral-2501",
+        "org": "mistralai",
+        "model_name": "Codestral-2501",
+        "base_model": None,
+        "params_b": 25.0,
+        "active_params_b": 25.0,
+        "context_length": 256000,
+        "architecture": "MistralForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 86.20, "bbh": 84.00, "math_hard": 80.50,
+            "gpqa": 63.50, "musr": 58.00, "mmlu_pro": 74.20, "arena_elo": 1315.0,
+            "swe_bench_verified": 62.40, "codeforces_elo": 2150.0
+        }
+    },
+    {
         "model_id": "mistralai/Mistral-Large-2411",
         "org": "mistralai",
         "model_name": "Mistral-Large-2411",
@@ -1708,6 +1938,23 @@ MODELS_SEED_DATA = [
         }
     },
     {
+        "model_id": "microsoft/Phi-4-mini-instruct",
+        "org": "microsoft",
+        "model_name": "Phi-4-mini-instruct",
+        "base_model": None,
+        "params_b": 3.80,
+        "active_params_b": 3.80,
+        "context_length": 128000,
+        "architecture": "PhiForCausalLM",
+        "license": "mit",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 78.20, "bbh": 79.50, "math_hard": 74.00,
+            "gpqa": 56.00, "musr": 49.00, "mmlu_pro": 64.50, "arena_elo": 1260.0
+        }
+    },
+    {
         "model_id": "microsoft/Phi-3.5-mini-instruct",
         "org": "microsoft",
         "model_name": "Phi-3.5-mini-instruct",
@@ -1760,6 +2007,42 @@ MODELS_SEED_DATA = [
             "gpqa": 43.10, "musr": 49.20, "mmlu_pro": 66.80, "arena_elo": 1242.0
         }
     },
+    # --- Moonshot AI Models ---
+    {
+        "model_id": "moonshotai/Kimi-k1.5",
+        "org": "moonshotai",
+        "model_name": "Kimi-k1.5",
+        "base_model": None,
+        "params_b": None,
+        "active_params_b": None,
+        "context_length": 200000,
+        "architecture": "Proprietary",
+        "license": "proprietary",
+        "precision": "Unknown",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 89.20, "bbh": 91.50, "math_hard": 92.00,
+            "gpqa": 81.00, "musr": 71.50, "mmlu_pro": 86.00, "arena_elo": 1368.0,
+            "swe_bench_verified": 71.00, "aime_2024": 89.50
+        }
+    },
+    {
+        "model_id": "moonshotai/Moonlight-16B-A3B-Instruct",
+        "org": "moonshotai",
+        "model_name": "Moonlight-16B-A3B-Instruct",
+        "base_model": None,
+        "params_b": 16.0,
+        "active_params_b": 3.0,
+        "context_length": 128000,
+        "architecture": "MoonlightForCausalLM",
+        "license": "apache-2.0",
+        "precision": "BF16",
+        "is_moe": 1,
+        "benchmarks": {
+            "ifeval": 79.50, "bbh": 78.20, "math_hard": 68.00,
+            "gpqa": 56.50, "musr": 48.00, "mmlu_pro": 65.00, "arena_elo": 1265.0
+        }
+    },
     {
         "model_id": "01-ai/Yi-1.5-34B-Chat",
         "org": "01-ai",
@@ -1792,6 +2075,24 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 71.00, "bbh": 70.50, "math_hard": 36.00,
             "gpqa": 36.80, "musr": 41.20, "mmlu_pro": 53.50, "arena_elo": 1185.0
+        }
+    },
+    {
+        "model_id": "CohereForAI/c4ai-command-a-03-2025",
+        "org": "CohereForAI",
+        "model_name": "c4ai-command-a-03-2025",
+        "base_model": None,
+        "params_b": 111.0,
+        "active_params_b": 111.0,
+        "context_length": 256000,
+        "architecture": "CohereForCausalLM",
+        "license": "cc-by-nc-4.0",
+        "precision": "BF16",
+        "is_moe": 0,
+        "benchmarks": {
+            "ifeval": 88.50, "bbh": 87.20, "math_hard": 80.00,
+            "gpqa": 69.50, "musr": 63.00, "mmlu_pro": 78.20, "arena_elo": 1335.0,
+            "swe_bench_verified": 59.20
         }
     },
     {

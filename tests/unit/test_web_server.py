@@ -27,13 +27,13 @@ class TestWebServer(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertIn("version", data)
-        self.assertEqual(data.get("model_count"), "1449")
+        self.assertEqual(data.get("model_count"), "1465")
 
     def test_02_get_all_models_and_filter(self):
         res = self.client.get("/api/models")
         self.assertEqual(res.status_code, 200)
         models = res.json()
-        self.assertEqual(len(models), 1449)
+        self.assertEqual(len(models), 1465)
         first = models[0]
         self.assertIn("model_id", first)
         self.assertIn("estimated_vram_gb", first)
@@ -50,7 +50,7 @@ class TestWebServer(unittest.TestCase):
         res_np = self.client.get("/api/models?hide_proprietary=true")
         self.assertEqual(res_np.status_code, 200)
         open_models = res_np.json()
-        self.assertEqual(len(open_models), 1405)
+        self.assertEqual(len(open_models), 1418)
         self.assertTrue(all(m.get("license") != "proprietary" for m in open_models))
         self.assertTrue(all(m.get("params_b") is not None for m in open_models))
 
@@ -92,7 +92,7 @@ class TestWebServer(unittest.TestCase):
         res_all = self.client.get("/api/audit")
         self.assertEqual(res_all.status_code, 200)
         audits = res_all.json()
-        self.assertEqual(len(audits), 1449)
+        self.assertEqual(len(audits), 1465)
         self.assertEqual(audits[0]["status"], "HIGH_CONTAMINATION_RISK")
 
         res_single = self.client.get("/api/audit/overfit-ai/Goodhart-Overfit-7B")

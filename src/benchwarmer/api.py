@@ -3,7 +3,7 @@
 import json
 import math
 import re
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from benchwarmer.contracts import (
     QUANT_BITS_MAP,
@@ -102,8 +102,23 @@ class BenchWarmer:
             self._resolution_cache[clean_query] = resolved
             return resolved
 
-        # Stage 3: Match on model_name or stripped org
         stripped_query = clean_query.split("/")[-1]
+
+        # Stage 2.5: Prefer Instruct variant if query didn't specify base
+        if "base" not in clean_query.lower() and "instruct" not in clean_query.lower():
+            instruct_query = clean_query + "-Instruct"
+            instruct_stripped = stripped_query + "-Instruct"
+            cursor.execute(
+                "SELECT model_id FROM models WHERE LOWER(model_id) = LOWER(?) OR LOWER(model_name) = LOWER(?) OR LOWER(model_name) = LOWER(?) LIMIT 1",
+                (instruct_query, instruct_query, instruct_stripped),
+            )
+            row = cursor.fetchone()
+            if row:
+                resolved = row["model_id"]
+                self._resolution_cache[clean_query] = resolved
+                return resolved
+
+        # Stage 3: Match on model_name or stripped org
         cursor.execute(
             "SELECT model_id FROM models WHERE LOWER(model_name) = LOWER(?) OR LOWER(model_name) = LOWER(?) LIMIT 1",
             (clean_query, stripped_query),
@@ -117,8 +132,14 @@ class BenchWarmer:
         # Stage 4: FTS5 rank query
         sanitized = _sanitize_fts_query(clean_query)
         try:
+            prefer_instruct = "base" not in clean_query.lower() and "instruct" not in clean_query.lower()
+            order_clause = (
+                "CASE WHEN LOWER(model_id) LIKE '%instruct%' THEN 0 ELSE 1 END, rank"
+                if prefer_instruct
+                else "rank"
+            )
             cursor.execute(
-                "SELECT model_id FROM models_fts WHERE models_fts MATCH ? ORDER BY rank LIMIT 1",
+                f"SELECT model_id FROM models_fts WHERE models_fts MATCH ? ORDER BY {order_clause} LIMIT 1",
                 (sanitized,),
             )
             row = cursor.fetchone()

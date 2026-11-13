@@ -27,7 +27,7 @@ jobs:
       - name: Install Build & Ingest Dependencies
         run: |
           pip install --upgrade pip
-          pip install .[build] build
+          pip install .[build] build duckdb
 
       - name: Execute Upstream Sync & Checksum Gate
         id: sync

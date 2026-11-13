@@ -32,6 +32,11 @@ FRONTIER_BENCHMARKS = {
     "codeforces_elo",
     "livecodebench",
     "math500",
+    "mmmu",
+    "ocrbench",
+    "docvqa",
+    "mathvista",
+    "vision_arena_elo",
 }
 
 
@@ -161,7 +166,12 @@ def populate_database(records: List[Dict], target_db: Path, schema_file: Path) -
                 suite = "frontier_evals"
                 metric = "raw"
                 raw_score = fval
-                score = fval if bench_name != "codeforces_elo" else min(100.0, fval / 30.0)
+                if bench_name == "codeforces_elo":
+                    score = min(100.0, fval / 30.0)
+                elif bench_name == "vision_arena_elo":
+                    score = max(0.0, min(100.0, (fval - 1000.0) / 4.0))
+                else:
+                    score = fval
             else:
                 suite = "hf_v2"
                 metric = "norm_score"
@@ -227,7 +237,7 @@ def main() -> int:
         # Live upstream ingestion / deterministic rebuild
         sys.path.insert(0, str(ROOT_DIR / "scripts"))
         from generate_seed_db import build_seed_database
-        new_sha = build_seed_database(temp_db, schema_file)
+        new_sha = build_seed_database(temp_db, schema_file, existing_db=target_db)
 
 
     old_sha = checksum_file.read_text(encoding="utf-8").strip() if checksum_file.exists() else ""

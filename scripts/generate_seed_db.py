@@ -2959,14 +2959,18 @@ def _extract_existing_models(target_db: Path, exclude_ids: set[str]) -> list[dic
     return preserved
 
 
-def build_seed_database(target_db: Path, schema_file: Path) -> str:
+def build_seed_database(target_db: Path, schema_file: Path, existing_db: Path = None) -> str:
     curated_ids = {item["model_id"]: item for item in MODELS_SEED_DATA}
     parquet_path = ROOT_DIR / "scripts" / "hf_leaderboard.parquet"
     hf_models = load_hf_leaderboard_models(parquet_path)
-    if not hf_models and target_db.exists():
-        hf_models = _extract_existing_models(target_db, set(curated_ids))
-        if hf_models:
-            print(f"Preserving {len(hf_models)} existing non-curated models from {target_db.name}.")
+    if not hf_models:
+        source_db = existing_db if (existing_db and existing_db.exists()) else (
+            target_db if target_db.exists() else (ROOT_DIR / "src" / "benchwarmer" / "data" / "benchmarks.db")
+        )
+        if source_db and source_db.exists():
+            hf_models = _extract_existing_models(source_db, set(curated_ids))
+            if hf_models:
+                print(f"Preserving {len(hf_models)} existing non-curated models from {source_db.name}.")
 
     target_db.parent.mkdir(parents=True, exist_ok=True)
     if target_db.exists():

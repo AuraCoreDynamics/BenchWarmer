@@ -3,7 +3,13 @@
 from pathlib import Path
 import unittest
 
-from starlette.testclient import TestClient
+try:
+    from starlette.testclient import TestClient
+    import fastapi  # noqa: F401
+    _WEB_DEPS_AVAILABLE = True
+except ImportError:
+    TestClient = None  # type: ignore[assignment,misc]
+    _WEB_DEPS_AVAILABLE = False
 
 from benchwarmer.api import BenchWarmer
 from benchwarmer.web.server import create_fastapi_app
@@ -14,6 +20,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 class TestWebServer(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if not _WEB_DEPS_AVAILABLE:
+            raise unittest.SkipTest("fastapi/starlette not installed in current environment.")
         cls.bw = BenchWarmer()
         cls.app = create_fastapi_app(bw=cls.bw)
         cls.client = TestClient(cls.app)

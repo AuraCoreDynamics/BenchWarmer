@@ -27,6 +27,11 @@ FRONTIER_BENCHMARKS = {
     "codeforces_elo",
     "livecodebench",
     "math500",
+    "mmmu",
+    "ocrbench",
+    "docvqa",
+    "mathvista",
+    "vision_arena_elo",
 }
 
 MODELS_SEED_DATA = [
@@ -261,7 +266,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 84.30, "bbh": 88.20, "math_hard": 76.60,
-            "gpqa": 53.60, "musr": 58.20, "mmlu_pro": 77.40, "arena_elo": 1288.0
+            "gpqa": 53.60, "musr": 58.20, "mmlu_pro": 77.40, "arena_elo": 1288.0,
+            "mmmu": 69.10, "ocrbench": 73.60, "docvqa": 92.80, "mathvista": 63.80, "vision_arena_elo": 1295.0
         }
     },
     {
@@ -295,7 +301,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 79.50, "bbh": 82.00, "math_hard": 70.20,
-            "gpqa": 40.20, "musr": 52.10, "mmlu_pro": 65.80, "arena_elo": 1224.0
+            "gpqa": 40.20, "musr": 52.10, "mmlu_pro": 65.80, "arena_elo": 1224.0,
+            "mmmu": 59.40, "ocrbench": 78.50, "docvqa": 88.20, "mathvista": 52.40, "vision_arena_elo": 1215.0
         }
     },
     {
@@ -453,7 +460,8 @@ MODELS_SEED_DATA = [
             "ifeval": 93.50, "bbh": 95.50, "math_hard": 96.00,
             "gpqa": 93.00, "musr": 87.00, "mmlu_pro": 93.50, "arena_elo": 1430.0,
             "swe_bench_verified": 92.00, "swe_bench_pro": 78.00, "cybergym": 82.50,
-            "hle_tools": 62.00
+            "hle_tools": 62.00,
+            "mmmu": 76.50, "ocrbench": 84.20, "docvqa": 95.80, "mathvista": 78.40, "vision_arena_elo": 1385.0
         }
     },
     {
@@ -472,7 +480,8 @@ MODELS_SEED_DATA = [
             "ifeval": 92.20, "bbh": 94.20, "math_hard": 94.50,
             "gpqa": 89.50, "musr": 81.50, "mmlu_pro": 91.20, "arena_elo": 1410.0,
             "swe_bench_verified": 87.50, "swe_bench_pro": 70.00,
-            "hle_tools": 55.00
+            "hle_tools": 55.00,
+            "mmmu": 74.80, "ocrbench": 83.00, "docvqa": 95.20, "mathvista": 75.60, "vision_arena_elo": 1365.0
         }
     },
     {
@@ -652,7 +661,8 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 89.00, "bbh": 92.50, "math_hard": 91.00,
             "gpqa": 84.00, "musr": 78.00, "mmlu_pro": 88.50, "arena_elo": 1395.0,
-            "swe_bench_verified": 78.40, "aime_2024": 87.00, "hle_tools": 48.60
+            "swe_bench_verified": 78.40, "aime_2024": 87.00, "hle_tools": 48.60,
+            "mmmu": 81.70, "ocrbench": 87.40, "docvqa": 96.40, "mathvista": 82.00, "vision_arena_elo": 1410.0
         }
     },
     {
@@ -669,7 +679,8 @@ MODELS_SEED_DATA = [
         "is_moe": 1,
         "benchmarks": {
             "ifeval": 86.40, "bbh": 88.20, "math_hard": 87.50,
-            "gpqa": 75.80, "musr": 71.00, "mmlu_pro": 84.20, "arena_elo": 1350.0
+            "gpqa": 75.80, "musr": 71.00, "mmlu_pro": 84.20, "arena_elo": 1350.0,
+            "mmmu": 75.20, "ocrbench": 85.10, "docvqa": 95.00, "mathvista": 76.50, "vision_arena_elo": 1360.0
         }
     },
     {
@@ -789,7 +800,8 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 86.40, "bbh": 85.50, "math_hard": 79.50,
             "gpqa": 67.50, "musr": 57.20, "mmlu_pro": 75.80, "arena_elo": 1339.0,
-            "aime_2024": 68.50
+            "aime_2024": 68.50,
+            "mmmu": 64.90, "ocrbench": 81.20, "docvqa": 91.50, "mathvista": 67.50, "vision_arena_elo": 1270.0
         }
     },
     {
@@ -806,7 +818,8 @@ MODELS_SEED_DATA = [
         "is_moe": 0,
         "benchmarks": {
             "ifeval": 82.10, "bbh": 80.50, "math_hard": 71.00,
-            "gpqa": 58.00, "musr": 51.50, "mmlu_pro": 68.20, "arena_elo": 1285.0
+            "gpqa": 58.00, "musr": 51.50, "mmlu_pro": 68.20, "arena_elo": 1285.0,
+            "mmmu": 59.60, "ocrbench": 78.40, "docvqa": 88.90, "mathvista": 61.20, "vision_arena_elo": 1220.0
         }
     },
     {
@@ -1778,7 +1791,8 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 87.50, "bbh": 86.20, "math_hard": 78.40,
             "gpqa": 68.50, "musr": 60.20, "mmlu_pro": 76.50, "arena_elo": 1340.0,
-            "swe_bench_verified": 58.00
+            "swe_bench_verified": 58.00,
+            "mmmu": 69.40, "ocrbench": 83.70, "docvqa": 93.00, "mathvista": 69.20, "vision_arena_elo": 1290.0
         }
     },
     {
@@ -2675,7 +2689,8 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 82.50, "bbh": 78.40, "math_hard": 58.20,
             "gpqa": 51.50, "musr": 47.00, "mmlu_pro": 62.80, "arena_elo": 1265.0,
-            "swe_bench_verified": 32.00
+            "swe_bench_verified": 32.00,
+            "mmmu": 50.70, "ocrbench": 75.30, "docvqa": 88.40, "mathvista": 51.50, "vision_arena_elo": 1190.0
         }
     },
     {
@@ -2693,7 +2708,8 @@ MODELS_SEED_DATA = [
         "benchmarks": {
             "ifeval": 87.80, "bbh": 88.00, "math_hard": 74.50,
             "gpqa": 66.80, "musr": 58.20, "mmlu_pro": 74.00, "arena_elo": 1332.0,
-            "swe_bench_verified": 43.00, "aime_2024": 52.00
+            "swe_bench_verified": 43.00, "aime_2024": 52.00,
+            "mmmu": 60.30, "ocrbench": 79.10, "docvqa": 92.30, "mathvista": 57.30, "vision_arena_elo": 1265.0
         }
     },
 
@@ -2755,6 +2771,12 @@ def parse_params_from_name(name: str):
 
 
 def load_hf_leaderboard_models(parquet_path: Path):
+    try:
+        import duckdb
+    except ImportError:
+        print("Warning: duckdb not installed, skipping Hugging Face parquet ingestion.")
+        return []
+
     if not parquet_path.exists():
         url = "https://huggingface.co/datasets/open-llm-leaderboard/contents/resolve/refs%2Fconvert%2Fparquet/default/train/0000.parquet"
         try:
@@ -2764,12 +2786,6 @@ def load_hf_leaderboard_models(parquet_path: Path):
         except Exception as e:
             print(f"Warning: Could not download Hugging Face leaderboard parquet: {e}")
             return []
-
-    try:
-        import duckdb
-    except ImportError:
-        print("Warning: duckdb not installed, skipping Hugging Face parquet ingestion.")
-        return []
 
     con = duckdb.connect()
     q = f"""
@@ -2894,7 +2910,64 @@ def load_hf_leaderboard_models(parquet_path: Path):
     return result
 
 
+def _extract_existing_models(target_db: Path, exclude_ids: set[str]) -> list[dict]:
+    """Preserve previously ingested non-curated models when duckdb/parquet is unavailable."""
+    if not target_db.exists():
+        return []
+    try:
+        conn = sqlite3.connect(target_db)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT * FROM models").fetchall()
+        score_rows = conn.execute(
+            "SELECT model_id, benchmark, raw_score, score FROM benchmark_scores"
+        ).fetchall()
+        conn.close()
+    except Exception as exc:
+        print(f"Warning: Could not read existing models from {target_db}: {exc}")
+        return []
+
+    scores_by_model: dict[str, dict[str, float]] = {}
+    for sr in score_rows:
+        mid = sr["model_id"]
+        val = sr["raw_score"] if sr["raw_score"] is not None else sr["score"]
+        scores_by_model.setdefault(mid, {})[sr["benchmark"]] = float(val)
+
+    preserved = []
+    for r in rows:
+        mid = r["model_id"]
+        if mid in exclude_ids:
+            continue
+        try:
+            raw_meta = json.loads(r["raw_metadata"]) if r["raw_metadata"] else {}
+        except Exception:
+            raw_meta = {}
+        preserved.append({
+            "model_id": mid,
+            "org": r["org"],
+            "model_name": r["model_name"],
+            "base_model": r["base_model"],
+            "params_b": r["params_b"],
+            "active_params_b": r["active_params_b"],
+            "context_length": r["context_length"],
+            "architecture": r["architecture"],
+            "license": r["license"],
+            "precision": r["precision"],
+            "is_moe": r["is_moe"],
+            "benchmarks": scores_by_model.get(mid, {}),
+            "raw_metadata": raw_meta,
+        })
+    return preserved
+
+
 def build_seed_database(target_db: Path, schema_file: Path) -> str:
+    curated_ids = {item["model_id"]: item for item in MODELS_SEED_DATA}
+    parquet_path = ROOT_DIR / "scripts" / "hf_leaderboard.parquet"
+    hf_models = load_hf_leaderboard_models(parquet_path)
+    if not hf_models and target_db.exists():
+        hf_models = _extract_existing_models(target_db, set(curated_ids))
+        if hf_models:
+            print(f"Preserving {len(hf_models)} existing non-curated models from {target_db.name}.")
+
     target_db.parent.mkdir(parents=True, exist_ok=True)
     if target_db.exists():
         target_db.unlink()
@@ -2904,10 +2977,6 @@ def build_seed_database(target_db: Path, schema_file: Path) -> str:
     conn.executescript(schema_file.read_text(encoding="utf-8"))
 
     cursor = conn.cursor()
-
-    curated_ids = {item["model_id"]: item for item in MODELS_SEED_DATA}
-    parquet_path = ROOT_DIR / "scripts" / "hf_leaderboard.parquet"
-    hf_models = load_hf_leaderboard_models(parquet_path)
 
     combined_models = list(MODELS_SEED_DATA)
     for hf_item in hf_models:
@@ -2959,7 +3028,12 @@ def build_seed_database(target_db: Path, schema_file: Path) -> str:
                 suite = "frontier_evals"
                 metric = "raw"
                 raw_score = float(val)
-                score = float(val) if bench != "codeforces_elo" else min(100.0, float(val) / 30.0)
+                if bench == "codeforces_elo":
+                    score = min(100.0, float(val) / 30.0)
+                elif bench == "vision_arena_elo":
+                    score = max(0.0, min(100.0, (float(val) - 1000.0) / 4.0))
+                else:
+                    score = float(val)
             else:
                 suite = "hf_v2"
                 metric = "norm_score"

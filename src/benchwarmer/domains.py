@@ -136,6 +136,22 @@ DOMAINS: Dict[str, Dict[str, Any]] = {
         },
         "frontier_keys": [],
     },
+    "vision": {
+        "key": "vision",
+        "title": "Vision & Multimodal Extraction",
+        "short_title": "Vision & OCR",
+        "icon": "👁️",
+        "personas": ["OCR Engineers", "Document AI Developers", "Multimodal Analysts"],
+        "description": "Image OCR, document understanding, visual Q&A, object/activity extraction, and chart analysis.",
+        "weights": {
+            "mmmu": 0.30,
+            "ocrbench": 0.25,
+            "docvqa": 0.20,
+            "mathvista": 0.15,
+            "vision_arena_elo": 0.10,
+        },
+        "frontier_keys": ["mmmu", "ocrbench", "docvqa", "mathvista", "vision_arena_elo"],
+    },
 }
 
 
@@ -172,7 +188,10 @@ def compute_domain_scores(
 
         for bench_name, weight in weights.items():
             if bench_name in norm_scores:
-                accum_val += norm_scores[bench_name] * weight
+                val = norm_scores[bench_name]
+                if bench_name == "vision_arena_elo" and val > 100.0:
+                    val = max(0.0, min(100.0, (val - 1000.0) / 4.0))
+                accum_val += val * weight
                 accum_weight += weight
 
         if accum_weight > 0.0:
@@ -280,8 +299,8 @@ def determine_primary_domain(
         primary_key = "coding"
     elif any(k in mid_lower for k in ["math", "qwq"]):
         primary_key = "math_science"
-    elif any(k in mid_lower for k in ["vision", "mllama"]):
-        primary_key = "analytics"
+    elif any(k in mid_lower for k in ["vision", "vlm", "mllama", "pixtral", "llava", "qwen2-vl", "qwen2.5-vl", "internvl"]):
+        primary_key = "vision"
     elif params_b is not None and params_b <= 4.0 and (license_str or "").lower() != "proprietary":
         # Compact sub-4B open-weights model
         if domain_scores.get("edge", 0.0) >= 50.0 or any(k in mid_lower for k in ["elm", "mobile", "edge", "nano"]):
